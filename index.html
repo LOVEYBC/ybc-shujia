@@ -1,0 +1,1021 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暑假学习计划模板工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-color: #0ea5e9;
+            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #38bdf8;
+            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-light);
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .template-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .checkbox-cell {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-cell:hover {
+            background-color: var(--accent-color);
+            opacity: 0.1;
+        }
+
+        .checkbox-cell.checked {
+            background-color: #10b981;
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        .time-cell {
+            min-width: 80px;
+        }
+
+        .day-cell {
+            min-width: 120px;
+        }
+
+        .habit-row td {
+            text-align: center;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .editable-cell {
+            cursor: text;
+            min-height: 24px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .editable-cell:hover {
+            background-color: rgba(14, 165, 233, 0.1);
+        }
+
+        .editable-cell:focus {
+            outline: 2px solid var(--accent-color);
+            background-color: rgba(14, 165, 233, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="card sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <svg class="w-7 h-7 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <div>
+                <h1 class="text-lg font-bold" id="pageTitle">暑假学习计划</h1>
+                <p class="text-xs text-gray-500" id="weekRange">第1周（7月1日 - 7月7日）</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="copyBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                复制
+            </button>
+            <button id="exportBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                导出Excel
+            </button>
+            <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex h-[calc(100vh-60px)] two-col-layout">
+        <!-- 左侧模板选择区 -->
+        <aside class="w-56 p-3 overflow-y-auto border-r border-gray-200 dark:border-gray-700">
+            <h2 class="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400">📋 模板选择</h2>
+            <div id="templateList" class="space-y-2">
+            </div>
+        </aside>
+
+        <!-- 中部编辑区 -->
+        <section class="flex-1 p-4 overflow-y-auto">
+            <!-- 阶段计划区 -->
+            <div class="card rounded-lg p-4 mb-4">
+                <div class="section-title">
+                    <span>🎯</span>
+                    <span>阶段计划</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">阶段大任务</label>
+                        <div id="stageGoal" class="editable-cell text-sm" contenteditable="true" placeholder="输入阶段大任务...">完成大学学业，找到工作，可以在大城市就业</div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">阶段目标</label>
+                        <div id="stageTasks" class="editable-cell text-sm" contenteditable="true" placeholder="输入阶段目标...">英语四级、HCIP证书、减肥、比赛、7月份找实习</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 本周Flag -->
+            <div class="card rounded-lg p-4 mb-4">
+                <div class="section-title">
+                    <span>🚩</span>
+                    <span>本周 Flag</span>
+                </div>
+                <div id="weeklyFlag" class="space-y-2">
+                </div>
+                <button onclick="addWeeklyFlag()" class="mt-2 text-xs text-primary-500 hover:text-primary-600 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    添加Flag
+                </button>
+            </div>
+
+            <!-- 本周待办 -->
+            <div class="card rounded-lg p-4 mb-4">
+                <div class="section-title">
+                    <span>📝</span>
+                    <span>本周待办</span>
+                </div>
+                <div id="weeklyTodo" class="space-y-2">
+                </div>
+                <button onclick="addWeeklyTodo()" class="mt-2 text-xs text-primary-500 hover:text-primary-600 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    添加待办
+                </button>
+            </div>
+
+            <!-- 每日时间轴 -->
+            <div class="card rounded-lg p-4 mb-4">
+                <div class="section-title">
+                    <span>⏰</span>
+                    <span>每日时间轴</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" id="timeTable">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-800">
+                                <th class="time-cell px-2 py-2 text-left font-medium">时段</th>
+                                <th class="day-cell px-2 py-2 font-medium">周一</th>
+                                <th class="day-cell px-2 py-2 font-medium">周二</th>
+                                <th class="day-cell px-2 py-2 font-medium">周三</th>
+                                <th class="day-cell px-2 py-2 font-medium">周四</th>
+                                <th class="day-cell px-2 py-2 font-medium">周五</th>
+                                <th class="day-cell px-2 py-2 font-medium">周六</th>
+                                <th class="day-cell px-2 py-2 font-medium">周日</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timeTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 习惯打卡 -->
+            <div class="card rounded-lg p-4 mb-4">
+                <div class="section-title">
+                    <span>✅</span>
+                    <span>习惯打卡</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" id="habitTable">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-800">
+                                <th class="px-2 py-2 text-left font-medium w-24">习惯</th>
+                                <th class="px-2 py-2 font-medium">周一</th>
+                                <th class="px-2 py-2 font-medium">周二</th>
+                                <th class="px-2 py-2 font-medium">周三</th>
+                                <th class="px-2 py-2 font-medium">周四</th>
+                                <th class="px-2 py-2 font-medium">周五</th>
+                                <th class="px-2 py-2 font-medium">周六</th>
+                                <th class="px-2 py-2 font-medium">周日</th>
+                            </tr>
+                        </thead>
+                        <tbody id="habitTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <button onclick="addHabit()" class="mt-2 text-xs text-primary-500 hover:text-primary-600 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    添加习惯
+                </button>
+            </div>
+
+            <!-- 周复盘 -->
+            <div class="card rounded-lg p-4">
+                <div class="section-title">
+                    <span>🔄</span>
+                    <span>周复盘</span>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">做得好的：</label>
+                        <div id="reflectionGood" class="editable-cell text-sm min-h-[60px]" contenteditable="true" placeholder="记录本周做得好的地方..."></div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">需要改进的：</label>
+                        <div id="reflectionBad" class="editable-cell text-sm min-h-[60px]" contenteditable="true" placeholder="记录需要改进的地方..."></div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 mb-1 block">下周调整：</label>
+                        <div id="reflectionNext" class="editable-cell text-sm min-h-[60px]" contenteditable="true" placeholder="下周计划调整..."></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 右侧预览区 -->
+        <section class="w-[40%] p-3 overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <h2 class="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400">👁 实时预览</h2>
+            
+            <!-- 预览卡片 -->
+            <div class="space-y-3">
+                <div class="card rounded-lg p-3">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">阶段计划</div>
+                    <div id="previewStage" class="text-sm"></div>
+                </div>
+
+                <div class="card rounded-lg p-3">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">本周Flag</div>
+                    <div id="previewFlag" class="text-sm space-y-1"></div>
+                </div>
+
+                <div class="card rounded-lg p-3">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">本周待办</div>
+                    <div id="previewTodo" class="text-sm space-y-1"></div>
+                </div>
+
+                <div class="card rounded-lg p-3">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">每日时间轴</div>
+                    <div id="previewTime" class="text-sm"></div>
+                </div>
+
+                <div class="card rounded-lg p-3">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">习惯打卡</div>
+                    <div id="previewHabit" class="text-sm"></div>
+                    <div id="habitStats" class="mt-2 text-xs text-gray-500"></div>
+                </div>
+
+                <div class="card rounded-lg p-3">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">周复盘</div>
+                    <div id="previewReflection" class="text-sm"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ========== 5套预设模板数据 ==========
+        const templates = [
+            {
+                id: 'template1',
+                name: '大学生求职版',
+                icon: '🎓',
+                description: '求职准备+学习+减脂',
+                data: {
+                    stageGoal: '完成大学学业，找到工作，可以在大城市就业',
+                    stageTasks: '英语四级、HCIP证书、减肥、比赛、7月份找实习',
+                    weeklyFlag: [
+                        { text: '训练2次（周一/三）', checked: false },
+                        { text: '图书馆1次（周六）', checked: false },
+                        { text: '23:00前睡觉', checked: false },
+                        { text: '戒糖+高蛋白饮食', checked: false },
+                        { text: '留白日不卷', checked: false }
+                    ],
+                    weeklyTodo: [
+                        { text: 'HCIA/HCIP刷1个模块', checked: false },
+                        { text: '精读英文技术文章1篇', checked: false },
+                        { text: '准备英文自我介绍', checked: false },
+                        { text: '复盘本周实习问题', checked: false },
+                        { text: '整理项目素材', checked: false },
+                        { text: '周六图书馆（09-12）', checked: false },
+                        { text: '周日完全休息', checked: false },
+                        { text: '周日晚上准备下周物品', checked: false }
+                    ],
+                    timeSlots: [
+                        { time: '07:30-08:10', days: ['起床洗漱早餐', '起床洗漱早餐', '起床洗漱早餐', '起床洗漱早餐', '起床洗漱早餐', '睡到自然醒', '睡到自然醒'] },
+                        { time: '08:10-08:30', days: ['通勤（听英语/播客）', '通勤（听英语/播客）', '通勤（听英语/播客）', '通勤（听英语/播客）', '通勤（听英语/播客）', '', ''] },
+                        { time: '08:30-12:00', days: ['实习工作', '实习工作', '实习工作', '实习工作', '实习工作', '图书馆09-12', '自由安排'] },
+                        { time: '12:00-12:30', days: ['午餐（减脂餐）', '午餐（减脂餐）', '午餐（减脂餐）', '午餐（减脂餐）', '午餐（减脂餐）', '午餐', '午餐'] },
+                        { time: '12:30-13:10', days: ['饭后慢走+午休', '40分钟快走+午休', '饭后慢走+午休', '饭后慢走+午休', '饭后慢走+午休', '自由', '自由'] },
+                        { time: '13:10-13:50', days: ['午休小憩', '午休小憩', '午休小憩', '午休小憩', '午休小憩', '自由', '自由'] },
+                        { time: '14:00-17:30', days: ['实习工作', '实习工作', '实习工作', '实习工作', '实习工作', '自由', '自由'] },
+                        { time: '17:30-18:10', days: ['通勤回家·放空', '通勤回家·放空', '通勤回家·放空', '通勤回家·放空', '通勤回家·放空', '自由', '自由'] },
+                        { time: '18:10-18:40', days: ['晚餐（7分饱）', '晚餐（7分饱）', '晚餐（7分饱）', '晚餐（7分饱）', '晚餐（7分饱）', '晚餐', '晚餐'] },
+                        { time: '18:40-20:20', days: ['纯休息缓冲', '学习60分钟', '纯休息缓冲', '学习60分钟', '玩游戏', '自由', '自由'] },
+                        { time: '20:20-20:35', days: ['准备去健身房', '自由时间', '准备去健身房', '自由时间', '玩游戏', '自由', '自由'] },
+                        { time: '20:35-21:25', days: ['力量训练', '自由', '力量训练', '自由', '玩游戏', '可选有氧30分钟', '自由'] },
+                        { time: '21:30-22:30', days: ['PUBG', 'PUBG', 'PUBG', 'PUBG', 'PUBG', 'PUBG', 'PUBG'] },
+                        { time: '22:30-23:00', days: ['洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '准备下周物品', '准备下周物品'] },
+                        { time: '23:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
+                    ],
+                    habits: [
+                        { name: '早睡早起', days: [false, false, false, false, false, false, false] },
+                        { name: '干净饮食', days: [false, false, false, false, false, false, false] },
+                        { name: '做每日计划', days: [false, false, false, false, false, false, false] },
+                        { name: '背英语单词', days: [false, false, false, false, false, false, false] },
+                        { name: '周日复盘', days: [false, false, false, false, false, false, false] }
+                    ],
+                    reflection: { good: '', bad: '', next: '' }
+                }
+            },
+            {
+                id: 'template2',
+                name: '高强度学习版',
+                icon: '🔥',
+                description: '集中突破薄弱科目',
+                data: {
+                    stageGoal: '暑假集中突破，秋季开学逆袭',
+                    stageTasks: '数学提分20分、英语过四级、物理化学巩固',
+                    weeklyFlag: [
+                        { text: '每天学习6小时以上', checked: false },
+                        { text: '完成数学专项训练', checked: false },
+                        { text: '英语单词积累500个', checked: false },
+                        { text: '错题本整理完善', checked: false }
+                    ],
+                    weeklyTodo: [
+                        { text: '数学函数专题', checked: false },
+                        { text: '数学几何专题', checked: false },
+                        { text: '英语阅读每天2篇', checked: false },
+                        { text: '物理力学复习', checked: false },
+                        { text: '化学有机基础', checked: false },
+                        { text: '整理本周错题', checked: false },
+                        { text: '周日模拟测试', checked: false }
+                    ],
+                    timeSlots: [
+                        { time: '07:00-07:30', days: ['晨读准备', '晨读准备', '晨读准备', '晨读准备', '晨读准备', '晨读准备', '休息'] },
+                        { time: '07:30-08:30', days: ['语文晨读', '英语晨读', '语文晨读', '英语晨读', '语文晨读', '英语晨读', '休息'] },
+                        { time: '08:30-10:00', days: ['数学专项', '数学专项', '数学专项', '数学专项', '数学专项', '图书馆', '自由'] },
+                        { time: '10:00-10:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '自由'] },
+                        { time: '10:15-11:45', days: ['物理', '化学', '物理', '化学', '物理', '图书馆', '自由'] },
+                        { time: '11:45-12:30', days: ['午餐', '午餐', '午餐', '午餐', '午餐', '午餐', '午餐'] },
+                        { time: '12:30-13:30', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
+                        { time: '13:30-15:00', days: ['英语阅读', '英语阅读', '英语阅读', '英语阅读', '英语阅读', '图书馆', '自由'] },
+                        { time: '15:00-15:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '自由'] },
+                        { time: '15:15-16:45', days: ['错题整理', '错题整理', '错题整理', '错题整理', '错题整理', '图书馆', '自由'] },
+                        { time: '16:45-17:30', days: ['自由复习', '自由复习', '自由复习', '自由复习', '自由复习', '回家', '自由'] },
+                        { time: '17:30-18:30', days: ['晚餐+休息', '晚餐+休息', '晚餐+休息', '晚餐+休息', '晚餐+休息', '晚餐', '晚餐'] },
+                        { time: '18:30-20:00', days: ['自习', '自习', '自习', '自习', '自习', '自由', '自由'] },
+                        { time: '20:00-21:00', days: ['复盘总结', '复盘总结', '复盘总结', '复盘总结', '复盘总结', '自由', '自由'] },
+                        { time: '21:00-22:00', days: ['洗漱准备', '洗漱准备', '洗漱准备', '洗漱准备', '洗漱准备', '自由', '自由'] },
+                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
+                    ],
+                    habits: [
+                        { name: '晨读', days: [false, false, false, false, false, false, false] },
+                        { name: '背单词', days: [false, false, false, false, false, false, false] },
+                        { name: '整理错题', days: [false, false, false, false, false, false, false] },
+                        { name: '复盘总结', days: [false, false, false, false, false, false, false] }
+                    ],
+                    reflection: { good: '', bad: '', next: '' }
+                }
+            },
+            {
+                id: 'template3',
+                name: '劳逸结合版',
+                icon: '⚖️',
+                description: '平衡学习与休息',
+                data: {
+                    stageGoal: '暑假保持学习节奏，充实度过',
+                    stageTasks: '完成暑假作业、培养阅读习惯、适度运动',
+                    weeklyFlag: [
+                        { text: '每天学习3小时', checked: false },
+                        { text: '阅读一本书', checked: false },
+                        { text: '运动3次', checked: false },
+                        { text: '保持作息规律', checked: false }
+                    ],
+                    weeklyTodo: [
+                        { text: '完成数学作业', checked: false },
+                        { text: '完成英语作业', checked: false },
+                        { text: '阅读课外书', checked: false },
+                        { text: '整理学习笔记', checked: false },
+                        { text: '周六户外活动', checked: false },
+                        { text: '周日自由安排', checked: false }
+                    ],
+                    timeSlots: [
+                        { time: '08:00-08:30', days: ['起床洗漱', '起床洗漱', '起床洗漱', '起床洗漱', '起床洗漱', '起床洗漱', '自然醒'] },
+                        { time: '08:30-10:00', days: ['学习', '学习', '学习', '学习', '学习', '户外活动', '自由'] },
+                        { time: '10:00-10:30', days: ['休息运动', '休息运动', '休息运动', '休息运动', '休息运动', '户外活动', '自由'] },
+                        { time: '10:30-12:00', days: ['学习', '学习', '学习', '学习', '学习', '户外活动', '自由'] },
+                        { time: '12:00-13:00', days: ['午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐', '午餐'] },
+                        { time: '13:00-14:00', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
+                        { time: '14:00-15:30', days: ['学习', '学习', '学习', '学习', '学习', '自由', '自由'] },
+                        { time: '15:30-16:00', days: ['休息', '休息', '休息', '休息', '休息', '自由', '自由'] },
+                        { time: '16:00-17:30', days: ['阅读', '阅读', '阅读', '阅读', '阅读', '自由', '自由'] },
+                        { time: '17:30-18:30', days: ['晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐'] },
+                        { time: '18:30-20:00', days: ['自由时间', '自由时间', '自由时间', '自由时间', '自由时间', '自由', '自由'] },
+                        { time: '20:00-21:00', days: ['兴趣爱好', '兴趣爱好', '兴趣爱好', '兴趣爱好', '兴趣爱好', '自由', '自由'] },
+                        { time: '21:00-22:00', days: ['洗漱复盘', '洗漱复盘', '洗漱复盘', '洗漱复盘', '洗漱复盘', '自由', '自由'] },
+                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
+                    ],
+                    habits: [
+                        { name: '按时起床', days: [false, false, false, false, false, false, false] },
+                        { name: '学习打卡', days: [false, false, false, false, false, false, false] },
+                        { name: '阅读30分钟', days: [false, false, false, false, false, false, false] },
+                        { name: '运动', days: [false, false, false, false, false, false, false] }
+                    ],
+                    reflection: { good: '', bad: '', next: '' }
+                }
+            },
+            {
+                id: 'template4',
+                name: '技能提升版',
+                icon: '💻',
+                description: '编程/技能专项训练',
+                data: {
+                    stageGoal: '暑假提升专业技能，为求职做准备',
+                    stageTasks: '完成项目实战、刷算法题、准备面试',
+                    weeklyFlag: [
+                        { text: '完成1个实战项目', checked: false },
+                        { text: '算法题50道', checked: false },
+                        { text: '技术博客2篇', checked: false },
+                        { text: 'GitHub每日提交', checked: false }
+                    ],
+                    weeklyTodo: [
+                        { text: '项目功能开发', checked: false },
+                        { text: '算法专项练习', checked: false },
+                        { text: '阅读技术文档', checked: false },
+                        { text: '写技术博客', checked: false },
+                        { text: '代码复盘优化', checked: false },
+                        { text: '面试题准备', checked: false }
+                    ],
+                    timeSlots: [
+                        { time: '08:00-09:00', days: ['技术阅读', '技术阅读', '技术阅读', '技术阅读', '技术阅读', '深度学习', '休息'] },
+                        { time: '09:00-12:00', days: ['项目开发', '项目开发', '项目开发', '项目开发', '项目开发', '深度学习', '自由'] },
+                        { time: '12:00-13:00', days: ['午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐', '午餐'] },
+                        { time: '13:00-14:00', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
+                        { time: '14:00-16:00', days: ['算法练习', '算法练习', '算法练习', '算法练习', '算法练习', '自由', '自由'] },
+                        { time: '16:00-17:00', days: ['代码复盘', '代码复盘', '代码复盘', '代码复盘', '代码复盘', '自由', '自由'] },
+                        { time: '17:00-18:00', days: ['Git提交整理', 'Git提交整理', 'Git提交整理', 'Git提交整理', 'Git提交整理', '自由', '自由'] },
+                        { time: '18:00-19:00', days: ['晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐'] },
+                        { time: '19:00-21:00', days: ['写博客/学习', '写博客/学习', '写博客/学习', '写博客/学习', '写博客/学习', '自由', '自由'] },
+                        { time: '21:00-22:00', days: ['复盘总结', '复盘总结', '复盘总结', '复盘总结', '复盘总结', '自由', '自由'] },
+                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
+                    ],
+                    habits: [
+                        { name: 'GitHub提交', days: [false, false, false, false, false, false, false] },
+                        { name: '技术阅读', days: [false, false, false, false, false, false, false] },
+                        { name: '算法练习', days: [false, false, false, false, false, false, false] },
+                        { name: '复盘总结', days: [false, false, false, false, false, false, false] }
+                    ],
+                    reflection: { good: '', bad: '', next: '' }
+                }
+            },
+            {
+                id: 'template5',
+                name: '备考冲刺版',
+                icon: '📚',
+                description: '考试集中复习计划',
+                data: {
+                    stageGoal: '暑假集中备考，目标考试高分通过',
+                    stageTasks: '系统复习各科、真题模拟、查漏补缺',
+                    weeklyFlag: [
+                        { text: '每天复习8小时', checked: false },
+                        { text: '完成真题3套', checked: false },
+                        { text: '重点章节掌握', checked: false },
+                        { text: '模拟考试达标', checked: false }
+                    ],
+                    weeklyTodo: [
+                        { text: '复习核心章节', checked: false },
+                        { text: '真题模拟训练', checked: false },
+                        { text: '错题专项突破', checked: false },
+                        { text: '背诵重点内容', checked: false },
+                        { text: '周六全真模拟', checked: false },
+                        { text: '周日查漏补缺', checked: false }
+                    ],
+                    timeSlots: [
+                        { time: '06:30-07:30', days: ['晨读背诵', '晨读背诵', '晨读背诵', '晨读背诵', '晨读背诵', '晨读背诵', '休息'] },
+                        { time: '07:30-08:00', days: ['早餐准备', '早餐准备', '早餐准备', '早餐准备', '早餐准备', '早餐', '早餐'] },
+                        { time: '08:00-10:00', days: ['科目1复习', '科目1复习', '科目1复习', '科目1复习', '科目1复习', '全真模拟', '自由'] },
+                        { time: '10:00-10:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '自由'] },
+                        { time: '10:15-12:00', days: ['科目2复习', '科目2复习', '科目2复习', '科目2复习', '科目2复习', '全真模拟', '自由'] },
+                        { time: '12:00-13:00', days: ['午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐', '午餐'] },
+                        { time: '13:00-14:00', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
+                        { time: '14:00-16:00', days: ['科目3复习', '科目3复习', '科目3复习', '科目3复习', '科目3复习', '复盘分析', '查漏补缺'] },
+                        { time: '16:00-16:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '休息'] },
+                        { time: '16:15-18:00', days: ['真题练习', '真题练习', '真题练习', '真题练习', '真题练习', '复盘分析', '查漏补缺'] },
+                        { time: '18:00-19:00', days: ['晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐'] },
+                        { time: '19:00-21:00', days: ['错题整理', '错题整理', '错题整理', '错题整理', '错题整理', '自由', '自由'] },
+                        { time: '21:00-22:00', days: ['背诵复习', '背诵复习', '背诵复习', '背诵复习', '背诵复习', '自由', '自由'] },
+                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
+                    ],
+                    habits: [
+                        { name: '晨读背诵', days: [false, false, false, false, false, false, false] },
+                        { name: '真题练习', days: [false, false, false, false, false, false, false] },
+                        { name: '错题整理', days: [false, false, false, false, false, false, false] },
+                        { name: '复盘总结', days: [false, false, false, false, false, false, false] }
+                    ],
+                    reflection: { good: '', bad: '', next: '' }
+                }
+            }
+        ];
+
+        // ========== 当前数据状态 ==========
+        let currentData = {
+            stageGoal: '',
+            stageTasks: '',
+            weeklyFlag: [],
+            weeklyTodo: [],
+            timeSlots: [],
+            habits: [],
+            reflection: { good: '', bad: '', next: '' }
+        };
+
+        // ========== 渲染模板列表 ==========
+        function renderTemplates() {
+            const container = document.getElementById('templateList');
+            container.innerHTML = templates.map(template => `
+                <div class="template-card card rounded-lg p-3 cursor-pointer transition-all text-sm" onclick="loadTemplate('${template.id}')">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-base">${template.icon}</span>
+                        <span class="font-medium">${template.name}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${template.description}</p>
+                </div>
+            `).join('');
+        }
+
+        // ========== 加载模板 ==========
+        function loadTemplate(templateId) {
+            const template = templates.find(t => t.id === templateId);
+            if (template) {
+                currentData = JSON.parse(JSON.stringify(template.data));
+                renderAll();
+            }
+        }
+
+        // ========== 渲染所有内容 ==========
+        function renderAll() {
+            renderStage();
+            renderWeeklyFlag();
+            renderWeeklyTodo();
+            renderTimeSlots();
+            renderHabits();
+            renderPreview();
+        }
+
+        // ========== 渲染阶段计划 ==========
+        function renderStage() {
+            document.getElementById('stageGoal').textContent = currentData.stageGoal;
+            document.getElementById('stageTasks').textContent = currentData.stageTasks;
+        }
+
+        // ========== 渲染本周Flag ==========
+        function renderWeeklyFlag() {
+            const container = document.getElementById('weeklyFlag');
+            container.innerHTML = currentData.weeklyFlag.map((item, index) => `
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} 
+                        onchange="toggleFlag(${index})"
+                        class="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500">
+                    <input type="text" value="${item.text}" 
+                        onchange="updateFlag(${index}, this.value)"
+                        class="flex-1 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <button onclick="removeFlag(${index})" class="text-red-400 hover:text-red-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleFlag(index) {
+            currentData.weeklyFlag[index].checked = !currentData.weeklyFlag[index].checked;
+            renderPreview();
+        }
+
+        function updateFlag(index, value) {
+            currentData.weeklyFlag[index].text = value;
+            renderPreview();
+        }
+
+        function addWeeklyFlag() {
+            currentData.weeklyFlag.push({ text: '', checked: false });
+            renderWeeklyFlag();
+            renderPreview();
+        }
+
+        function removeFlag(index) {
+            currentData.weeklyFlag.splice(index, 1);
+            renderWeeklyFlag();
+            renderPreview();
+        }
+
+        // ========== 渲染本周待办 ==========
+        function renderWeeklyTodo() {
+            const container = document.getElementById('weeklyTodo');
+            container.innerHTML = currentData.weeklyTodo.map((item, index) => `
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} 
+                        onchange="toggleTodo(${index})"
+                        class="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500">
+                    <input type="text" value="${item.text}" 
+                        onchange="updateTodo(${index}, this.value)"
+                        class="flex-1 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <button onclick="removeTodo(${index})" class="text-red-400 hover:text-red-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleTodo(index) {
+            currentData.weeklyTodo[index].checked = !currentData.weeklyTodo[index].checked;
+            renderPreview();
+        }
+
+        function updateTodo(index, value) {
+            currentData.weeklyTodo[index].text = value;
+            renderPreview();
+        }
+
+        function addWeeklyTodo() {
+            currentData.weeklyTodo.push({ text: '', checked: false });
+            renderWeeklyTodo();
+            renderPreview();
+        }
+
+        function removeTodo(index) {
+            currentData.weeklyTodo.splice(index, 1);
+            renderWeeklyTodo();
+            renderPreview();
+        }
+
+        // ========== 渲染时间轴表格 ==========
+        function renderTimeSlots() {
+            const tbody = document.getElementById('timeTableBody');
+            tbody.innerHTML = currentData.timeSlots.map((slot, slotIndex) => `
+                <tr class="border-b border-gray-100 dark:border-gray-700">
+                    <td class="time-cell px-2 py-2 font-medium text-xs">${slot.time}</td>
+                    ${slot.days.map((day, dayIndex) => `
+                        <td class="day-cell px-2 py-2">
+                            <input type="text" value="${day}" 
+                                onchange="updateTimeSlot(${slotIndex}, ${dayIndex}, this.value)"
+                                class="w-full px-1 py-1 text-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-600 rounded bg-transparent focus:outline-none focus:border-primary-500">
+                        </td>
+                    `).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function updateTimeSlot(slotIndex, dayIndex, value) {
+            currentData.timeSlots[slotIndex].days[dayIndex] = value;
+            renderPreview();
+        }
+
+        // ========== 渲染习惯打卡 ==========
+        function renderHabits() {
+            const tbody = document.getElementById('habitTableBody');
+            tbody.innerHTML = currentData.habits.map((habit, habitIndex) => `
+                <tr class="habit-row border-b border-gray-100 dark:border-gray-700">
+                    <td class="px-2 py-2">
+                        <input type="text" value="${habit.name}" 
+                            onchange="updateHabitName(${habitIndex}, this.value)"
+                            class="w-full px-1 py-1 text-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-600 rounded bg-transparent focus:outline-none focus:border-primary-500">
+                    </td>
+                    ${habit.days.map((checked, dayIndex) => `
+                        <td class="px-2 py-2">
+                            <div class="checkbox-cell w-6 h-6 mx-auto rounded border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs font-bold ${checked ? 'checked' : ''}"
+                                onclick="toggleHabit(${habitIndex}, ${dayIndex})">
+                                ${checked ? '✓' : ''}
+                            </div>
+                        </td>
+                    `).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function toggleHabit(habitIndex, dayIndex) {
+            currentData.habits[habitIndex].days[dayIndex] = !currentData.habits[habitIndex].days[dayIndex];
+            renderHabits();
+            renderPreview();
+        }
+
+        function updateHabitName(habitIndex, value) {
+            currentData.habits[habitIndex].name = value;
+            renderPreview();
+        }
+
+        function addHabit() {
+            currentData.habits.push({ name: '', days: [false, false, false, false, false, false, false] });
+            renderHabits();
+            renderPreview();
+        }
+
+        // ========== 渲染预览区 ==========
+        function renderPreview() {
+            // 阶段计划预览
+            document.getElementById('previewStage').innerHTML = `
+                <div><strong>大任务：</strong>${currentData.stageGoal}</div>
+                <div class="mt-1"><strong>阶段目标：</strong>${currentData.stageTasks}</div>
+            `;
+
+            // Flag预览
+            const flagHtml = currentData.weeklyFlag.map(item => `
+                <div class="${item.checked ? 'text-green-500' : ''}">
+                    ${item.checked ? '✓' : '○'} ${item.text || '空'}
+                </div>
+            `).join('');
+            document.getElementById('previewFlag').innerHTML = flagHtml || '<div class="text-gray-400">暂无Flag</div>';
+
+            // 待办预览
+            const todoHtml = currentData.weeklyTodo.map(item => `
+                <div class="${item.checked ? 'text-green-500' : ''}">
+                    ${item.checked ? '✓' : '○'} ${item.text || '空'}
+                </div>
+            `).join('');
+            document.getElementById('previewTodo').innerHTML = todoHtml || '<div class="text-gray-400">暂无待办</div>';
+
+            // 时间轴预览（简化显示）
+            const timeHtml = currentData.timeSlots.slice(0, 5).map(slot => `
+                <div class="mb-1">
+                    <span class="text-gray-500">${slot.time}</span>
+                    <span class="ml-2">${slot.days[0] || '-'}</span>
+                </div>
+            `).join('');
+            document.getElementById('previewTime').innerHTML = timeHtml + '<div class="text-xs text-gray-400 mt-1">...更多时段</div>';
+
+            // 习惯预览
+            let totalChecked = 0;
+            let totalSlots = 0;
+            const habitHtml = currentData.habits.map(habit => {
+                const count = habit.days.filter(d => d).length;
+                totalChecked += count;
+                totalSlots += 7;
+                return `<div>${habit.name}: ${count}/7</div>`;
+            }).join('');
+            document.getElementById('previewHabit').innerHTML = habitHtml || '<div class="text-gray-400">暂无习惯</div>';
+            document.getElementById('habitStats').innerHTML = `总完成率: ${totalSlots > 0 ? Math.round(totalChecked/totalSlots*100) : 0}%`;
+
+            // 复盘预览
+            const reflectionHtml = `
+                <div><strong>做得好的：</strong>${currentData.reflection.good || '待填写'}</div>
+                <div><strong>需改进：</strong>${currentData.reflection.bad || '待填写'}</div>
+                <div><strong>下周调整：</strong>${currentData.reflection.next || '待填写'}</div>
+            `;
+            document.getElementById('previewReflection').innerHTML = reflectionHtml;
+        }
+
+        // ========== 复制计划 ==========
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            let text = `【暑假学习计划】\n\n`;
+            text += `🎯 阶段计划\n大任务：${currentData.stageGoal}\n阶段目标：${currentData.stageTasks}\n\n`;
+            text += `🚩 本周Flag\n${currentData.weeklyFlag.map((item, i) => `${i+1}. ${item.checked ? '✓' : '○'} ${item.text}`).join('\n')}\n\n`;
+            text += `📝 本周待办\n${currentData.weeklyTodo.map((item, i) => `${i+1}. ${item.checked ? '✓' : '○'} ${item.text}`).join('\n')}\n\n`;
+            text += `⏰ 每日时间轴\n${currentData.timeSlots.map(slot => `${slot.time}: ${slot.days.join(' | ')}`).join('\n')}\n\n`;
+            text += `✅ 习惯打卡\n${currentData.habits.map(h => `${h.name}: ${h.days.map(d => d ? '✓' : '○').join(' ')}`).join('\n')}\n\n`;
+            text += `🔄 周复盘\n做得好的：${currentData.reflection.good}\n需改进：${currentData.reflection.bad}\n下周调整：${currentData.reflection.next}`;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('计划已复制到剪贴板');
+            } catch (err) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('计划已复制到剪贴板');
+            }
+        });
+
+        // ========== 导出Excel ==========
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+
+            // === 总览工作表 ===
+            const overviewData = [];
+            overviewData.push(['暑假学习计划', '', '', '', '', '', '', '阶段计划']);
+            overviewData.push(['', '', '', '', '', '', '', '']);
+            overviewData.push(['本周Flag', '', '', '', '', '', '', '每日时间轴']);
+            currentData.weeklyFlag.forEach((item, i) => {
+                overviewData.push([i+1, item.text, '', '', '', '', '', i+1, currentData.timeSlots[i]?.days[0] || '']);
+            });
+            overviewData.push(['', '', '', '', '', '', '', '']);
+            overviewData.push(['本周待办', '', '', '', '', '', '', '阶段任务']);
+            currentData.weeklyTodo.forEach((item, i) => {
+                overviewData.push([i+1, item.text, '', '', '', '', '', currentData.stageTasks]);
+            });
+            overviewData.push(['', '', '', '', '', '', '', '']);
+            overviewData.push(['习惯打卡', '', '', '', '', '', '', '周复盘']);
+            overviewData.push(['早睡早起', '周一', '周二', '周三', '周四', '周五', '周六', '做得好的：\n' + currentData.reflection.good]);
+            currentData.habits.forEach(h => {
+                overviewData.push([h.name, ...h.days.map(d => d ? '✓' : ''), '', '', '', '', '', '需改进：\n' + currentData.reflection.bad]);
+            });
+
+            const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
+            wsOverview['!cols'] = [{wch:15}, {wch:20}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:30}];
+            XLSX.utils.book_append_sheet(wb, wsOverview, '总览');
+
+            // === 周计划工作表 ===
+            const weekData = [];
+            weekData.push(['时段', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
+            currentData.timeSlots.forEach(slot => {
+                weekData.push([slot.time, ...slot.days]);
+            });
+
+            const wsWeek = XLSX.utils.aoa_to_sheet(weekData);
+            wsWeek['!cols'] = [{wch:12}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}];
+            XLSX.utils.book_append_sheet(wb, wsWeek, '周计划');
+
+            // === 习惯打卡工作表 ===
+            const habitData = [];
+            habitData.push(['习惯', '周一', '周二', '周三', '周四', '周五', '周六', '周日', '完成率']);
+            currentData.habits.forEach(h => {
+                const rate = h.days.filter(d => d).length / 7;
+                habitData.push([h.name, ...h.days.map(d => d ? '✓' : ''), Math.round(rate*100) + '%']);
+            });
+
+            const wsHabit = XLSX.utils.aoa_to_sheet(habitData);
+            wsHabit['!cols'] = [{wch:12}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:8}];
+            XLSX.utils.book_append_sheet(wb, wsHabit, '习惯打卡');
+
+            // 导出文件
+            XLSX.writeFile(wb, '暑假学习计划.xlsx');
+            showToast('Excel文件已导出');
+        });
+
+        // ========== 主题切换 ==========
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            sunIcon.classList.toggle('hidden', !isDark);
+            moonIcon.classList.toggle('hidden', isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // ========== 初始化主题 ==========
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.body.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
+        }
+
+        // ========== Toast提示 ==========
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 px-3 py-2 bg-gray-800 text-white rounded-lg shadow-lg z-50 text-sm';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
+        }
+
+        // ========== 监听阶段计划编辑 ==========
+        document.getElementById('stageGoal').addEventListener('input', function() {
+            currentData.stageGoal = this.textContent;
+            renderPreview();
+        });
+
+        document.getElementById('stageTasks').addEventListener('input', function() {
+            currentData.stageTasks = this.textContent;
+            renderPreview();
+        });
+
+        // ========== 监听复盘编辑 ==========
+        document.getElementById('reflectionGood').addEventListener('input', function() {
+            currentData.reflection.good = this.textContent;
+            renderPreview();
+        });
+
+        document.getElementById('reflectionBad').addEventListener('input', function() {
+            currentData.reflection.bad = this.textContent;
+            renderPreview();
+        });
+
+        document.getElementById('reflectionNext').addEventListener('input', function() {
+            currentData.reflection.next = this.textContent;
+            renderPreview();
+        });
+
+        // ========== 初始化 ==========
+        function init() {
+            renderTemplates();
+            initTheme();
+            loadTemplate('template1');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
