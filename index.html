@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暑假学习计划模板工具</title>
+    <title>暑假学习计划 - 智能版</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -23,999 +24,1340 @@
                             700: '#0369a1',
                             800: '#075985',
                             900: '#0c4a6e',
+                        },
+                        dark: {
+                            bg: '#1a1a2e',
+                            card: '#16213e',
+                            border: '#0f3460',
                         }
-                    }
-                }
-            }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            },
         }
     </script>
     <style>
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-card: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --accent-color: #0ea5e9;
-            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .dark {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border-color: #334155;
-            --accent-color: #38bdf8;
-            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.3);
-            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-light);
-            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .template-card:hover {
-            border-color: var(--accent-color);
-            box-shadow: var(--shadow-medium);
-            transform: translateY(-2px);
-        }
-
-        .checkbox-cell {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .checkbox-cell:hover {
-            background-color: var(--accent-color);
-            opacity: 0.1;
-        }
-
-        .checkbox-cell.checked {
-            background-color: #10b981;
-            color: white;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
-
-        .time-cell {
-            min-width: 80px;
-        }
-
-        .day-cell {
-            min-width: 120px;
-        }
-
-        .habit-row td {
-            text-align: center;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 12px;
-            color: var(--text-primary);
-        }
-
-        .editable-cell {
-            cursor: text;
-            min-height: 24px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .editable-cell:hover {
-            background-color: rgba(14, 165, 233, 0.1);
-        }
-
-        .editable-cell:focus {
-            outline: 2px solid var(--accent-color);
-            background-color: rgba(14, 165, 233, 0.05);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        .dark body { background-color: #1a1a2e; color: #e2e8f0; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .dark .glass { background: rgba(22, 33, 62, 0.8); border: 1px solid rgba(15, 52, 96, 0.5); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
+        .input-focus-ring:focus { outline: none; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+        .dark .input-focus-ring:focus { box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
+        .check-circle { transition: all 0.2s ease; }
+        .check-circle.checked { background-color: #0ea5e9; border-color: #0ea5e9; }
+        .dark .check-circle.checked { background-color: #38bdf8; border-color: #38bdf8; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-active { border-bottom: 2px solid #0ea5e9; color: #0ea5e9; }
+        .dark .tab-active { border-bottom: 2px solid #38bdf8; color: #38bdf8; }
+        .drag-over { border-color: #0ea5e9 !important; background-color: rgba(14, 165, 233, 0.05) !important; }
+        .dark .drag-over { background-color: rgba(56, 189, 248, 0.1) !important; }
+        .save-indicator { transition: opacity 0.3s; }
+        .save-indicator.saving { opacity: 1; }
+        .save-indicator.saved { opacity: 0.5; }
     </style>
 </head>
-<body class="min-h-screen">
-    <!-- 顶部导航栏 -->
-    <header class="card sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <svg class="w-7 h-7 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <div>
-                <h1 class="text-lg font-bold" id="pageTitle">暑假学习计划</h1>
-                <p class="text-xs text-gray-500" id="weekRange">第1周（7月1日 - 7月7日）</p>
+<body class="bg-white min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <header class="sticky top-0 z-50 glass border-b border-gray-100 dark:border-dark-border">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold text-lg">✏️</div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">暑假计划</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">智能导入 · 自动保存 · 精美导出</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="saveStatus" class="text-xs text-gray-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> 已保存</span>
+                    <button id="undoBtn" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-50 dark:bg-dark-card rounded-lg transition-colors disabled:opacity-40" disabled>↩️ 撤销</button>
+                    <button id="copyBtn" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-50 dark:bg-dark-card rounded-lg transition-colors">📋 复制</button>
+                    <button id="exportBtn" class="px-3 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">📊 导出Excel</button>
+                    <button id="exportJsonBtn" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-50 dark:bg-dark-card rounded-lg transition-colors">💾 导出JSON</button>
+                    <button id="themeBtn" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-dark-card flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border transition-colors">🌙</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex">
+            <aside class="w-64 shrink-0 border-r border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-bg/50 p-4 overflow-y-auto custom-scrollbar">
+                <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">自创模板</h2>
+                <div class="space-y-2">
+                    <button class="template-btn w-full text-left px-4 py-3 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-500 hover:shadow-sm transition-all" data-template="optimal-summer">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">☀️</span>
+                            <div>
+                                <div class="font-medium text-gray-800 dark:text-white">高效暑假模板</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">学习+休息+复盘 三合一</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="mt-6">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">导入数据</h2>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-xl p-4 text-center hover:border-primary-400 dark:hover:border-primary-400 transition-colors cursor-pointer" id="dropZone">
+                        <div class="text-4xl mb-2">📥</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300">拖拽文件到此处</div>
+                        <div class="text-xs text-gray-400 mt-1">支持 Excel/Word/CSV/TXT/JSON</div>
+                        <input type="file" id="importFile" class="hidden" accept=".xlsx,.xls,.docx,.csv,.txt,.json">
+                    </div>
+                    <button id="selectFileBtn" class="mt-3 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">📁 选择文件</button>
+                    <button id="pasteTextBtn" class="mt-2 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">📋 粘贴文本</button>
+                </div>
+
+                <div class="mt-6">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">快捷操作</h2>
+                    <button id="clearBtn" class="w-full px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">🗑️ 清空所有内容</button>
+                    <button id="loadSampleBtn" class="mt-2 w-full px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">📝 加载示例数据</button>
+                </div>
+            </aside>
+
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">📌 阶段目标</h2>
+                        <textarea id="stageGoal" class="w-full h-24 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl resize-none input-focus-ring transition-all" placeholder="这个暑假，我想达成什么目标？..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">🚩 本周重点</h2>
+                            <div class="space-y-3" id="flagsContainer">
+                                <div class="flex items-start gap-3 flag-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标..."></div>
+                                <div class="flex items-start gap-3 flag-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标..."></div>
+                                <div class="flex items-start gap-3 flag-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标..."></div>
+                                <button id="addFlagBtn" class="w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加重点</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">📋 待办清单</h2>
+                            <div class="space-y-3" id="todosContainer">
+                                <div class="flex items-start gap-3 todo-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项..."></div>
+                                <div class="flex items-start gap-3 todo-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项..."></div>
+                                <div class="flex items-start gap-3 todo-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项..."></div>
+                                <button id="addTodoBtn" class="w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加待办</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">⏰ 每日时间轴</h2>
+                            <div class="flex gap-2">
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors tab-active" data-day="mon">周一</button>
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="tue">周二</button>
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="wed">周三</button>
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="thu">周四</button>
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="fri">周五</button>
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="sat">周六</button>
+                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="sun">周日</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full" id="scheduleTable">
+                                <thead><tr class="border-b border-gray-200 dark:border-dark-border"><th class="text-left py-3 px-4 text-sm font-semibold text-gray-500 dark:text-gray-400 w-20">时间</th><th class="text-left py-3 px-4 text-sm font-semibold text-gray-500 dark:text-gray-400">安排</th></tr></thead>
+                                <tbody id="scheduleBody"></tbody>
+                            </table>
+                        </div>
+                        <button id="addTimeSlotBtn" class="mt-4 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加时间段</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">🌱 习惯打卡</h2>
+                            <div class="space-y-3" id="habitsContainer">
+                                <div class="flex items-center justify-between habit-item">
+                                    <input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="习惯名称...">
+                                    <div class="flex gap-1 ml-3">
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">一</button>
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">二</button>
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">三</button>
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">四</button>
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">五</button>
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">六</button>
+                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">日</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="addHabitBtn" class="mt-4 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加习惯</button>
+                        </div>
+
+                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">📝 周复盘</h2>
+                            <div class="space-y-3">
+                                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">本周成就</label><textarea class="w-full h-20 p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg resize-none text-sm input-focus-ring" id="achievements" placeholder="这一周我完成了什么？..."></textarea></div>
+                                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">下周计划</label><textarea class="w-full h-20 p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg resize-none text-sm input-focus-ring" id="nextWeek" placeholder="下一周我要做什么？..."></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="w-72 shrink-0 border-l border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-bg/50 p-4 overflow-y-auto custom-scrollbar">
+                <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">📊 进度概览</h2>
+                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600 dark:text-gray-300">本周重点</span><span id="flagsProgress" class="text-sm font-semibold text-primary-500">0/3</span></div>
+                    <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden"><div id="flagsBar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%"></div></div>
+                </div>
+                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600 dark:text-gray-300">待办清单</span><span id="todosProgress" class="text-sm font-semibold text-primary-500">0/3</span></div>
+                    <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden"><div id="todosBar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%"></div></div>
+                </div>
+                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mb-4">
+                    <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600 dark:text-gray-300">习惯完成率</span><span id="habitsProgress" class="text-sm font-semibold text-primary-500">0%</span></div>
+                    <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden"><div id="habitsBar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%"></div></div>
+                </div>
+                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4">
+                    <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-3">本周重点</h3>
+                    <ul id="previewFlags" class="space-y-2 text-sm text-gray-600 dark:text-gray-300"><li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span> 点击左侧添加</li></ul>
+                </div>
+                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mt-4">
+                    <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-3">阶段目标</h3>
+                    <p id="previewGoal" class="text-sm text-gray-600 dark:text-gray-300">点击左侧添加目标</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 right-6 px-6 py-3 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 rounded-xl shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">操作成功</div>
+
+    <div id="pasteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
+            <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-800 dark:text-white">粘贴文本</h3><button id="closePasteModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">✕</button></div>
+            <textarea id="pasteTextArea" class="w-full h-40 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl resize-none input-focus-ring" placeholder="在此粘贴文本内容..."></textarea>
+            <div class="text-xs text-gray-400 mt-2">支持智能识别：目标、重点、待办、习惯、时间安排等关键词</div>
+            <div class="flex gap-3 mt-4">
+                <button id="cancelPasteBtn" class="flex-1 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-dark-border rounded-lg hover:bg-gray-200 dark:hover:bg-dark-card transition-colors">取消</button>
+                <button id="confirmPasteBtn" class="flex-1 py-2 text-sm text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">确认导入</button>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <button id="copyBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                </svg>
-                复制
-            </button>
-            <button id="exportBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors text-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                导出Excel
-            </button>
-            <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-                <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                </svg>
-            </button>
-        </div>
-    </header>
-
-    <main class="flex h-[calc(100vh-60px)] two-col-layout">
-        <!-- 左侧模板选择区 -->
-        <aside class="w-56 p-3 overflow-y-auto border-r border-gray-200 dark:border-gray-700">
-            <h2 class="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400">📋 模板选择</h2>
-            <div id="templateList" class="space-y-2">
-            </div>
-        </aside>
-
-        <!-- 中部编辑区 -->
-        <section class="flex-1 p-4 overflow-y-auto">
-            <!-- 阶段计划区 -->
-            <div class="card rounded-lg p-4 mb-4">
-                <div class="section-title">
-                    <span>🎯</span>
-                    <span>阶段计划</span>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs text-gray-500 mb-1 block">阶段大任务</label>
-                        <div id="stageGoal" class="editable-cell text-sm" contenteditable="true" placeholder="输入阶段大任务...">完成大学学业，找到工作，可以在大城市就业</div>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 mb-1 block">阶段目标</label>
-                        <div id="stageTasks" class="editable-cell text-sm" contenteditable="true" placeholder="输入阶段目标...">英语四级、HCIP证书、减肥、比赛、7月份找实习</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 本周Flag -->
-            <div class="card rounded-lg p-4 mb-4">
-                <div class="section-title">
-                    <span>🚩</span>
-                    <span>本周 Flag</span>
-                </div>
-                <div id="weeklyFlag" class="space-y-2">
-                </div>
-                <button onclick="addWeeklyFlag()" class="mt-2 text-xs text-primary-500 hover:text-primary-600 flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    添加Flag
-                </button>
-            </div>
-
-            <!-- 本周待办 -->
-            <div class="card rounded-lg p-4 mb-4">
-                <div class="section-title">
-                    <span>📝</span>
-                    <span>本周待办</span>
-                </div>
-                <div id="weeklyTodo" class="space-y-2">
-                </div>
-                <button onclick="addWeeklyTodo()" class="mt-2 text-xs text-primary-500 hover:text-primary-600 flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    添加待办
-                </button>
-            </div>
-
-            <!-- 每日时间轴 -->
-            <div class="card rounded-lg p-4 mb-4">
-                <div class="section-title">
-                    <span>⏰</span>
-                    <span>每日时间轴</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm" id="timeTable">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-800">
-                                <th class="time-cell px-2 py-2 text-left font-medium">时段</th>
-                                <th class="day-cell px-2 py-2 font-medium">周一</th>
-                                <th class="day-cell px-2 py-2 font-medium">周二</th>
-                                <th class="day-cell px-2 py-2 font-medium">周三</th>
-                                <th class="day-cell px-2 py-2 font-medium">周四</th>
-                                <th class="day-cell px-2 py-2 font-medium">周五</th>
-                                <th class="day-cell px-2 py-2 font-medium">周六</th>
-                                <th class="day-cell px-2 py-2 font-medium">周日</th>
-                            </tr>
-                        </thead>
-                        <tbody id="timeTableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 习惯打卡 -->
-            <div class="card rounded-lg p-4 mb-4">
-                <div class="section-title">
-                    <span>✅</span>
-                    <span>习惯打卡</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm" id="habitTable">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-800">
-                                <th class="px-2 py-2 text-left font-medium w-24">习惯</th>
-                                <th class="px-2 py-2 font-medium">周一</th>
-                                <th class="px-2 py-2 font-medium">周二</th>
-                                <th class="px-2 py-2 font-medium">周三</th>
-                                <th class="px-2 py-2 font-medium">周四</th>
-                                <th class="px-2 py-2 font-medium">周五</th>
-                                <th class="px-2 py-2 font-medium">周六</th>
-                                <th class="px-2 py-2 font-medium">周日</th>
-                            </tr>
-                        </thead>
-                        <tbody id="habitTableBody">
-                        </tbody>
-                    </table>
-                </div>
-                <button onclick="addHabit()" class="mt-2 text-xs text-primary-500 hover:text-primary-600 flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    添加习惯
-                </button>
-            </div>
-
-            <!-- 周复盘 -->
-            <div class="card rounded-lg p-4">
-                <div class="section-title">
-                    <span>🔄</span>
-                    <span>周复盘</span>
-                </div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs text-gray-500 mb-1 block">做得好的：</label>
-                        <div id="reflectionGood" class="editable-cell text-sm min-h-[60px]" contenteditable="true" placeholder="记录本周做得好的地方..."></div>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 mb-1 block">需要改进的：</label>
-                        <div id="reflectionBad" class="editable-cell text-sm min-h-[60px]" contenteditable="true" placeholder="记录需要改进的地方..."></div>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 mb-1 block">下周调整：</label>
-                        <div id="reflectionNext" class="editable-cell text-sm min-h-[60px]" contenteditable="true" placeholder="下周计划调整..."></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 右侧预览区 -->
-        <section class="w-[40%] p-3 overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-            <h2 class="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400">👁 实时预览</h2>
-            
-            <!-- 预览卡片 -->
-            <div class="space-y-3">
-                <div class="card rounded-lg p-3">
-                    <div class="text-xs font-semibold text-gray-500 mb-2">阶段计划</div>
-                    <div id="previewStage" class="text-sm"></div>
-                </div>
-
-                <div class="card rounded-lg p-3">
-                    <div class="text-xs font-semibold text-gray-500 mb-2">本周Flag</div>
-                    <div id="previewFlag" class="text-sm space-y-1"></div>
-                </div>
-
-                <div class="card rounded-lg p-3">
-                    <div class="text-xs font-semibold text-gray-500 mb-2">本周待办</div>
-                    <div id="previewTodo" class="text-sm space-y-1"></div>
-                </div>
-
-                <div class="card rounded-lg p-3">
-                    <div class="text-xs font-semibold text-gray-500 mb-2">每日时间轴</div>
-                    <div id="previewTime" class="text-sm"></div>
-                </div>
-
-                <div class="card rounded-lg p-3">
-                    <div class="text-xs font-semibold text-gray-500 mb-2">习惯打卡</div>
-                    <div id="previewHabit" class="text-sm"></div>
-                    <div id="habitStats" class="mt-2 text-xs text-gray-500"></div>
-                </div>
-
-                <div class="card rounded-lg p-3">
-                    <div class="text-xs font-semibold text-gray-500 mb-2">周复盘</div>
-                    <div id="previewReflection" class="text-sm"></div>
-                </div>
-            </div>
-        </section>
-    </main>
+    </div>
 
     <script>
-        // ========== 5套预设模板数据 ==========
-        const templates = [
-            {
-                id: 'template1',
-                name: '大学生求职版',
-                icon: '🎓',
-                description: '求职准备+学习+减脂',
-                data: {
-                    stageGoal: '完成大学学业，找到工作，可以在大城市就业',
-                    stageTasks: '英语四级、HCIP证书、减肥、比赛、7月份找实习',
-                    weeklyFlag: [
-                        { text: '训练2次（周一/三）', checked: false },
-                        { text: '图书馆1次（周六）', checked: false },
-                        { text: '23:00前睡觉', checked: false },
-                        { text: '戒糖+高蛋白饮食', checked: false },
-                        { text: '留白日不卷', checked: false }
-                    ],
-                    weeklyTodo: [
-                        { text: 'HCIA/HCIP刷1个模块', checked: false },
-                        { text: '精读英文技术文章1篇', checked: false },
-                        { text: '准备英文自我介绍', checked: false },
-                        { text: '复盘本周实习问题', checked: false },
-                        { text: '整理项目素材', checked: false },
-                        { text: '周六图书馆（09-12）', checked: false },
-                        { text: '周日完全休息', checked: false },
-                        { text: '周日晚上准备下周物品', checked: false }
-                    ],
-                    timeSlots: [
-                        { time: '07:30-08:10', days: ['起床洗漱早餐', '起床洗漱早餐', '起床洗漱早餐', '起床洗漱早餐', '起床洗漱早餐', '睡到自然醒', '睡到自然醒'] },
-                        { time: '08:10-08:30', days: ['通勤（听英语/播客）', '通勤（听英语/播客）', '通勤（听英语/播客）', '通勤（听英语/播客）', '通勤（听英语/播客）', '', ''] },
-                        { time: '08:30-12:00', days: ['实习工作', '实习工作', '实习工作', '实习工作', '实习工作', '图书馆09-12', '自由安排'] },
-                        { time: '12:00-12:30', days: ['午餐（减脂餐）', '午餐（减脂餐）', '午餐（减脂餐）', '午餐（减脂餐）', '午餐（减脂餐）', '午餐', '午餐'] },
-                        { time: '12:30-13:10', days: ['饭后慢走+午休', '40分钟快走+午休', '饭后慢走+午休', '饭后慢走+午休', '饭后慢走+午休', '自由', '自由'] },
-                        { time: '13:10-13:50', days: ['午休小憩', '午休小憩', '午休小憩', '午休小憩', '午休小憩', '自由', '自由'] },
-                        { time: '14:00-17:30', days: ['实习工作', '实习工作', '实习工作', '实习工作', '实习工作', '自由', '自由'] },
-                        { time: '17:30-18:10', days: ['通勤回家·放空', '通勤回家·放空', '通勤回家·放空', '通勤回家·放空', '通勤回家·放空', '自由', '自由'] },
-                        { time: '18:10-18:40', days: ['晚餐（7分饱）', '晚餐（7分饱）', '晚餐（7分饱）', '晚餐（7分饱）', '晚餐（7分饱）', '晚餐', '晚餐'] },
-                        { time: '18:40-20:20', days: ['纯休息缓冲', '学习60分钟', '纯休息缓冲', '学习60分钟', '玩游戏', '自由', '自由'] },
-                        { time: '20:20-20:35', days: ['准备去健身房', '自由时间', '准备去健身房', '自由时间', '玩游戏', '自由', '自由'] },
-                        { time: '20:35-21:25', days: ['力量训练', '自由', '力量训练', '自由', '玩游戏', '可选有氧30分钟', '自由'] },
-                        { time: '21:30-22:30', days: ['PUBG', 'PUBG', 'PUBG', 'PUBG', 'PUBG', 'PUBG', 'PUBG'] },
-                        { time: '22:30-23:00', days: ['洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '洗漱·补蛋白·复盘', '准备下周物品', '准备下周物品'] },
-                        { time: '23:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
-                    ],
-                    habits: [
-                        { name: '早睡早起', days: [false, false, false, false, false, false, false] },
-                        { name: '干净饮食', days: [false, false, false, false, false, false, false] },
-                        { name: '做每日计划', days: [false, false, false, false, false, false, false] },
-                        { name: '背英语单词', days: [false, false, false, false, false, false, false] },
-                        { name: '周日复盘', days: [false, false, false, false, false, false, false] }
-                    ],
-                    reflection: { good: '', bad: '', next: '' }
-                }
-            },
-            {
-                id: 'template2',
-                name: '高强度学习版',
-                icon: '🔥',
-                description: '集中突破薄弱科目',
-                data: {
-                    stageGoal: '暑假集中突破，秋季开学逆袭',
-                    stageTasks: '数学提分20分、英语过四级、物理化学巩固',
-                    weeklyFlag: [
-                        { text: '每天学习6小时以上', checked: false },
-                        { text: '完成数学专项训练', checked: false },
-                        { text: '英语单词积累500个', checked: false },
-                        { text: '错题本整理完善', checked: false }
-                    ],
-                    weeklyTodo: [
-                        { text: '数学函数专题', checked: false },
-                        { text: '数学几何专题', checked: false },
-                        { text: '英语阅读每天2篇', checked: false },
-                        { text: '物理力学复习', checked: false },
-                        { text: '化学有机基础', checked: false },
-                        { text: '整理本周错题', checked: false },
-                        { text: '周日模拟测试', checked: false }
-                    ],
-                    timeSlots: [
-                        { time: '07:00-07:30', days: ['晨读准备', '晨读准备', '晨读准备', '晨读准备', '晨读准备', '晨读准备', '休息'] },
-                        { time: '07:30-08:30', days: ['语文晨读', '英语晨读', '语文晨读', '英语晨读', '语文晨读', '英语晨读', '休息'] },
-                        { time: '08:30-10:00', days: ['数学专项', '数学专项', '数学专项', '数学专项', '数学专项', '图书馆', '自由'] },
-                        { time: '10:00-10:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '自由'] },
-                        { time: '10:15-11:45', days: ['物理', '化学', '物理', '化学', '物理', '图书馆', '自由'] },
-                        { time: '11:45-12:30', days: ['午餐', '午餐', '午餐', '午餐', '午餐', '午餐', '午餐'] },
-                        { time: '12:30-13:30', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
-                        { time: '13:30-15:00', days: ['英语阅读', '英语阅读', '英语阅读', '英语阅读', '英语阅读', '图书馆', '自由'] },
-                        { time: '15:00-15:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '自由'] },
-                        { time: '15:15-16:45', days: ['错题整理', '错题整理', '错题整理', '错题整理', '错题整理', '图书馆', '自由'] },
-                        { time: '16:45-17:30', days: ['自由复习', '自由复习', '自由复习', '自由复习', '自由复习', '回家', '自由'] },
-                        { time: '17:30-18:30', days: ['晚餐+休息', '晚餐+休息', '晚餐+休息', '晚餐+休息', '晚餐+休息', '晚餐', '晚餐'] },
-                        { time: '18:30-20:00', days: ['自习', '自习', '自习', '自习', '自习', '自由', '自由'] },
-                        { time: '20:00-21:00', days: ['复盘总结', '复盘总结', '复盘总结', '复盘总结', '复盘总结', '自由', '自由'] },
-                        { time: '21:00-22:00', days: ['洗漱准备', '洗漱准备', '洗漱准备', '洗漱准备', '洗漱准备', '自由', '自由'] },
-                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
-                    ],
-                    habits: [
-                        { name: '晨读', days: [false, false, false, false, false, false, false] },
-                        { name: '背单词', days: [false, false, false, false, false, false, false] },
-                        { name: '整理错题', days: [false, false, false, false, false, false, false] },
-                        { name: '复盘总结', days: [false, false, false, false, false, false, false] }
-                    ],
-                    reflection: { good: '', bad: '', next: '' }
-                }
-            },
-            {
-                id: 'template3',
-                name: '劳逸结合版',
-                icon: '⚖️',
-                description: '平衡学习与休息',
-                data: {
-                    stageGoal: '暑假保持学习节奏，充实度过',
-                    stageTasks: '完成暑假作业、培养阅读习惯、适度运动',
-                    weeklyFlag: [
-                        { text: '每天学习3小时', checked: false },
-                        { text: '阅读一本书', checked: false },
-                        { text: '运动3次', checked: false },
-                        { text: '保持作息规律', checked: false }
-                    ],
-                    weeklyTodo: [
-                        { text: '完成数学作业', checked: false },
-                        { text: '完成英语作业', checked: false },
-                        { text: '阅读课外书', checked: false },
-                        { text: '整理学习笔记', checked: false },
-                        { text: '周六户外活动', checked: false },
-                        { text: '周日自由安排', checked: false }
-                    ],
-                    timeSlots: [
-                        { time: '08:00-08:30', days: ['起床洗漱', '起床洗漱', '起床洗漱', '起床洗漱', '起床洗漱', '起床洗漱', '自然醒'] },
-                        { time: '08:30-10:00', days: ['学习', '学习', '学习', '学习', '学习', '户外活动', '自由'] },
-                        { time: '10:00-10:30', days: ['休息运动', '休息运动', '休息运动', '休息运动', '休息运动', '户外活动', '自由'] },
-                        { time: '10:30-12:00', days: ['学习', '学习', '学习', '学习', '学习', '户外活动', '自由'] },
-                        { time: '12:00-13:00', days: ['午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐', '午餐'] },
-                        { time: '13:00-14:00', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
-                        { time: '14:00-15:30', days: ['学习', '学习', '学习', '学习', '学习', '自由', '自由'] },
-                        { time: '15:30-16:00', days: ['休息', '休息', '休息', '休息', '休息', '自由', '自由'] },
-                        { time: '16:00-17:30', days: ['阅读', '阅读', '阅读', '阅读', '阅读', '自由', '自由'] },
-                        { time: '17:30-18:30', days: ['晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐'] },
-                        { time: '18:30-20:00', days: ['自由时间', '自由时间', '自由时间', '自由时间', '自由时间', '自由', '自由'] },
-                        { time: '20:00-21:00', days: ['兴趣爱好', '兴趣爱好', '兴趣爱好', '兴趣爱好', '兴趣爱好', '自由', '自由'] },
-                        { time: '21:00-22:00', days: ['洗漱复盘', '洗漱复盘', '洗漱复盘', '洗漱复盘', '洗漱复盘', '自由', '自由'] },
-                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
-                    ],
-                    habits: [
-                        { name: '按时起床', days: [false, false, false, false, false, false, false] },
-                        { name: '学习打卡', days: [false, false, false, false, false, false, false] },
-                        { name: '阅读30分钟', days: [false, false, false, false, false, false, false] },
-                        { name: '运动', days: [false, false, false, false, false, false, false] }
-                    ],
-                    reflection: { good: '', bad: '', next: '' }
-                }
-            },
-            {
-                id: 'template4',
-                name: '技能提升版',
-                icon: '💻',
-                description: '编程/技能专项训练',
-                data: {
-                    stageGoal: '暑假提升专业技能，为求职做准备',
-                    stageTasks: '完成项目实战、刷算法题、准备面试',
-                    weeklyFlag: [
-                        { text: '完成1个实战项目', checked: false },
-                        { text: '算法题50道', checked: false },
-                        { text: '技术博客2篇', checked: false },
-                        { text: 'GitHub每日提交', checked: false }
-                    ],
-                    weeklyTodo: [
-                        { text: '项目功能开发', checked: false },
-                        { text: '算法专项练习', checked: false },
-                        { text: '阅读技术文档', checked: false },
-                        { text: '写技术博客', checked: false },
-                        { text: '代码复盘优化', checked: false },
-                        { text: '面试题准备', checked: false }
-                    ],
-                    timeSlots: [
-                        { time: '08:00-09:00', days: ['技术阅读', '技术阅读', '技术阅读', '技术阅读', '技术阅读', '深度学习', '休息'] },
-                        { time: '09:00-12:00', days: ['项目开发', '项目开发', '项目开发', '项目开发', '项目开发', '深度学习', '自由'] },
-                        { time: '12:00-13:00', days: ['午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐', '午餐'] },
-                        { time: '13:00-14:00', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
-                        { time: '14:00-16:00', days: ['算法练习', '算法练习', '算法练习', '算法练习', '算法练习', '自由', '自由'] },
-                        { time: '16:00-17:00', days: ['代码复盘', '代码复盘', '代码复盘', '代码复盘', '代码复盘', '自由', '自由'] },
-                        { time: '17:00-18:00', days: ['Git提交整理', 'Git提交整理', 'Git提交整理', 'Git提交整理', 'Git提交整理', '自由', '自由'] },
-                        { time: '18:00-19:00', days: ['晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐'] },
-                        { time: '19:00-21:00', days: ['写博客/学习', '写博客/学习', '写博客/学习', '写博客/学习', '写博客/学习', '自由', '自由'] },
-                        { time: '21:00-22:00', days: ['复盘总结', '复盘总结', '复盘总结', '复盘总结', '复盘总结', '自由', '自由'] },
-                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
-                    ],
-                    habits: [
-                        { name: 'GitHub提交', days: [false, false, false, false, false, false, false] },
-                        { name: '技术阅读', days: [false, false, false, false, false, false, false] },
-                        { name: '算法练习', days: [false, false, false, false, false, false, false] },
-                        { name: '复盘总结', days: [false, false, false, false, false, false, false] }
-                    ],
-                    reflection: { good: '', bad: '', next: '' }
-                }
-            },
-            {
-                id: 'template5',
-                name: '备考冲刺版',
-                icon: '📚',
-                description: '考试集中复习计划',
-                data: {
-                    stageGoal: '暑假集中备考，目标考试高分通过',
-                    stageTasks: '系统复习各科、真题模拟、查漏补缺',
-                    weeklyFlag: [
-                        { text: '每天复习8小时', checked: false },
-                        { text: '完成真题3套', checked: false },
-                        { text: '重点章节掌握', checked: false },
-                        { text: '模拟考试达标', checked: false }
-                    ],
-                    weeklyTodo: [
-                        { text: '复习核心章节', checked: false },
-                        { text: '真题模拟训练', checked: false },
-                        { text: '错题专项突破', checked: false },
-                        { text: '背诵重点内容', checked: false },
-                        { text: '周六全真模拟', checked: false },
-                        { text: '周日查漏补缺', checked: false }
-                    ],
-                    timeSlots: [
-                        { time: '06:30-07:30', days: ['晨读背诵', '晨读背诵', '晨读背诵', '晨读背诵', '晨读背诵', '晨读背诵', '休息'] },
-                        { time: '07:30-08:00', days: ['早餐准备', '早餐准备', '早餐准备', '早餐准备', '早餐准备', '早餐', '早餐'] },
-                        { time: '08:00-10:00', days: ['科目1复习', '科目1复习', '科目1复习', '科目1复习', '科目1复习', '全真模拟', '自由'] },
-                        { time: '10:00-10:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '自由'] },
-                        { time: '10:15-12:00', days: ['科目2复习', '科目2复习', '科目2复习', '科目2复习', '科目2复习', '全真模拟', '自由'] },
-                        { time: '12:00-13:00', days: ['午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐休息', '午餐', '午餐'] },
-                        { time: '13:00-14:00', days: ['午休', '午休', '午休', '午休', '午休', '午休', '午休'] },
-                        { time: '14:00-16:00', days: ['科目3复习', '科目3复习', '科目3复习', '科目3复习', '科目3复习', '复盘分析', '查漏补缺'] },
-                        { time: '16:00-16:15', days: ['休息', '休息', '休息', '休息', '休息', '休息', '休息'] },
-                        { time: '16:15-18:00', days: ['真题练习', '真题练习', '真题练习', '真题练习', '真题练习', '复盘分析', '查漏补缺'] },
-                        { time: '18:00-19:00', days: ['晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐', '晚餐'] },
-                        { time: '19:00-21:00', days: ['错题整理', '错题整理', '错题整理', '错题整理', '错题整理', '自由', '自由'] },
-                        { time: '21:00-22:00', days: ['背诵复习', '背诵复习', '背诵复习', '背诵复习', '背诵复习', '自由', '自由'] },
-                        { time: '22:00', days: ['睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉', '睡觉'] }
-                    ],
-                    habits: [
-                        { name: '晨读背诵', days: [false, false, false, false, false, false, false] },
-                        { name: '真题练习', days: [false, false, false, false, false, false, false] },
-                        { name: '错题整理', days: [false, false, false, false, false, false, false] },
-                        { name: '复盘总结', days: [false, false, false, false, false, false, false] }
-                    ],
-                    reflection: { good: '', bad: '', next: '' }
-                }
+        const templates = {
+            'optimal-summer': {
+                stageGoal: "暑假实现学科查漏补缺，每日学习6小时，每周运动3次，完成2本课外书阅读，每日复盘总结",
+                flags: ["完成当日学习计划", "运动30分钟以上", "睡前复盘当日得失"],
+                todos: ["整理当日错题本", "背诵20个英语单词", "阅读课外书30分钟"],
+                schedule: [
+                    { time: "07:00", content: "晨起+早餐+复盘昨日" },
+                    { time: "08:00", content: "主科薄弱点专项学习" },
+                    { time: "10:15", content: "副科知识点梳理+练习" },
+                    { time: "12:00", content: "午餐+午休" },
+                    { time: "14:30", content: "技能学习（编程/写作等）" },
+                    { time: "16:45", content: "运动/户外活动" },
+                    { time: "19:00", content: "课外书阅读+笔记" },
+                    { time: "20:45", content: "当日复盘+明日计划" }
+                ],
+                habits: ["早起", "每日学习", "运动", "阅读", "复盘"]
             }
-        ];
-
-        // ========== 当前数据状态 ==========
-        let currentData = {
-            stageGoal: '',
-            stageTasks: '',
-            weeklyFlag: [],
-            weeklyTodo: [],
-            timeSlots: [],
-            habits: [],
-            reflection: { good: '', bad: '', next: '' }
         };
 
-        // ========== 渲染模板列表 ==========
-        function renderTemplates() {
-            const container = document.getElementById('templateList');
-            container.innerHTML = templates.map(template => `
-                <div class="template-card card rounded-lg p-3 cursor-pointer transition-all text-sm" onclick="loadTemplate('${template.id}')">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-base">${template.icon}</span>
-                        <span class="font-medium">${template.name}</span>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">${template.description}</p>
-                </div>
-            `).join('');
+        let currentDay = 'mon';
+        let currentTemplate = null;
+        let historyStack = [];
+        let historyIndex = -1;
+        const MAX_HISTORY = 50;
+        let saveTimeout = null;
+
+        const scheduleData = { mon: {}, tue: {}, wed: {}, thu: {}, fri: {}, sat: {}, sun: {} };
+
+        function saveToHistory() {
+            const state = {
+                stageGoal: document.getElementById('stageGoal').value,
+                achievements: document.getElementById('achievements').value,
+                nextWeek: document.getElementById('nextWeek').value,
+                flags: [], todos: [], habits: [],
+                scheduleData: JSON.parse(JSON.stringify(scheduleData)),
+                currentDay: currentDay,
+                currentTemplate: currentTemplate
+            };
+            document.querySelectorAll('.flag-item').forEach(item => {
+                state.flags.push({
+                    text: item.querySelector('input').value,
+                    checked: item.querySelector('.check-btn').classList.contains('checked')
+                });
+            });
+            document.querySelectorAll('.todo-item').forEach(item => {
+                state.todos.push({
+                    text: item.querySelector('input').value,
+                    checked: item.querySelector('.check-btn').classList.contains('checked')
+                });
+            });
+            document.querySelectorAll('.habit-item').forEach(item => {
+                const days = [];
+                item.querySelectorAll('.habit-check-btn').forEach(btn => {
+                    days.push(btn.classList.contains('bg-primary-500'));
+                });
+                state.habits.push({
+                    name: item.querySelector('input').value,
+                    days: days
+                });
+            });
+            historyStack = historyStack.slice(0, historyIndex + 1);
+            historyStack.push(state);
+            if (historyStack.length > MAX_HISTORY) {
+                historyStack.shift();
+            } else {
+                historyIndex++;
+            }
+            updateUndoButton();
+            scheduleAutoSave();
         }
 
-        // ========== 加载模板 ==========
-        function loadTemplate(templateId) {
-            const template = templates.find(t => t.id === templateId);
-            if (template) {
-                currentData = JSON.parse(JSON.stringify(template.data));
-                renderAll();
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreFromHistory(historyStack[historyIndex]);
+                showToast('已撤销');
             }
         }
 
-        // ========== 渲染所有内容 ==========
-        function renderAll() {
-            renderStage();
-            renderWeeklyFlag();
-            renderWeeklyTodo();
-            renderTimeSlots();
-            renderHabits();
-            renderPreview();
+        function restoreFromHistory(state) {
+            document.getElementById('stageGoal').value = state.stageGoal;
+            document.getElementById('achievements').value = state.achievements;
+            document.getElementById('nextWeek').value = state.nextWeek;
+
+            const flagsContainer = document.getElementById('flagsContainer');
+            const flagsAddBtn = document.getElementById('addFlagBtn');
+            flagsContainer.innerHTML = '';
+            state.flags.forEach(flag => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3 flag-item';
+                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (flag.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (flag.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + flag.text + '" placeholder="输入重点目标...">';
+                flagsContainer.appendChild(div);
+                initCheckBtn(div.querySelector('.check-btn'));
+                div.querySelector('input').addEventListener('input', updatePreview);
+            });
+            flagsContainer.appendChild(flagsAddBtn);
+
+            const todosContainer = document.getElementById('todosContainer');
+            const todosAddBtn = document.getElementById('addTodoBtn');
+            todosContainer.innerHTML = '';
+            state.todos.forEach(todo => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3 todo-item';
+                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (todo.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (todo.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + todo.text + '" placeholder="输入待办事项...">';
+                todosContainer.appendChild(div);
+                initCheckBtn(div.querySelector('.check-btn'));
+            });
+            todosContainer.appendChild(todosAddBtn);
+
+            const habitsContainer = document.getElementById('habitsContainer');
+            const habitsAddBtn = document.getElementById('addHabitBtn');
+            habitsContainer.innerHTML = '';
+            state.habits.forEach(habit => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between habit-item';
+                let daysHtml = '';
+                const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+                habit.days.forEach((checked, idx) => {
+                    daysHtml += '<button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors ' + (checked ? 'bg-primary-500 text-white' : '') + '">' + dayNames[idx] + '</button>';
+                });
+                div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + habit.name + '" placeholder="习惯名称..."><div class="flex gap-1 ml-3">' + daysHtml + '</div>';
+                habitsContainer.appendChild(div);
+                div.querySelectorAll('.habit-check-btn').forEach(btn => {
+                    btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
+                });
+            });
+            habitsContainer.appendChild(habitsAddBtn);
+
+            Object.keys(scheduleData).forEach(day => {
+                scheduleData[day] = JSON.parse(JSON.stringify(state.scheduleData[day]));
+            });
+            currentDay = state.currentDay;
+            currentTemplate = state.currentTemplate;
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.dataset.day === currentDay) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+                } else {
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
+                }
+            });
+
+            renderSchedule();
+            updateProgress();
+            updatePreview();
         }
 
-        // ========== 渲染阶段计划 ==========
-        function renderStage() {
-            document.getElementById('stageGoal').textContent = currentData.stageGoal;
-            document.getElementById('stageTasks').textContent = currentData.stageTasks;
+        function updateUndoButton() {
+            document.getElementById('undoBtn').disabled = historyIndex <= 0;
         }
 
-        // ========== 渲染本周Flag ==========
-        function renderWeeklyFlag() {
-            const container = document.getElementById('weeklyFlag');
-            container.innerHTML = currentData.weeklyFlag.map((item, index) => `
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} 
-                        onchange="toggleFlag(${index})"
-                        class="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500">
-                    <input type="text" value="${item.text}" 
-                        onchange="updateFlag(${index}, this.value)"
-                        class="flex-1 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    <button onclick="removeFlag(${index})" class="text-red-400 hover:text-red-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
+        function initSchedule(scheduleItems) {
+            saveToHistory();
+            Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
+            scheduleItems.forEach(item => {
+                const time = typeof item === 'string' ? item : item.time;
+                const content = typeof item === 'string' ? '' : (item.content || '');
+                Object.keys(scheduleData).forEach(day => {
+                    scheduleData[day][time] = content;
+                });
+            });
+            renderSchedule();
         }
 
-        function toggleFlag(index) {
-            currentData.weeklyFlag[index].checked = !currentData.weeklyFlag[index].checked;
-            renderPreview();
+        function renderSchedule() {
+            const tbody = document.getElementById('scheduleBody');
+            tbody.innerHTML = '';
+            const times = Object.keys(scheduleData[currentDay]).sort();
+            times.forEach(time => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card/50 transition-colors';
+                row.innerHTML = '<td class="py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">' + time + '</td><td class="py-3 px-4"><input type="text" class="schedule-input w-full text-gray-700 dark:text-gray-300 bg-transparent border-b border-gray-200 dark:border-dark-border focus:border-primary-400 dark:focus:border-primary-400 rounded-none px-0 py-1 text-sm input-focus-ring" placeholder="输入安排..." value="' + (scheduleData[currentDay][time] || '') + '" data-time="' + time + '"></td>';
+                tbody.appendChild(row);
+            });
+            document.querySelectorAll('.schedule-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    saveToHistory();
+                    scheduleData[currentDay][this.dataset.time] = this.value;
+                });
+            });
         }
 
-        function updateFlag(index, value) {
-            currentData.weeklyFlag[index].text = value;
-            renderPreview();
+        function loadTemplate(templateId) {
+            saveToHistory();
+            currentTemplate = templateId;
+            const template = templates[templateId];
+            
+            document.getElementById('stageGoal').value = template.stageGoal || '';
+            document.getElementById('achievements').value = '';
+            document.getElementById('nextWeek').value = '';
+
+            const flagsContainer = document.getElementById('flagsContainer');
+            const flagsAddBtn = document.getElementById('addFlagBtn');
+            flagsContainer.innerHTML = '';
+            (template.flags || []).forEach(flagText => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3 flag-item';
+                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + flagText + '" placeholder="输入重点目标...">';
+                flagsContainer.appendChild(div);
+                initCheckBtn(div.querySelector('.check-btn'));
+                div.querySelector('input').addEventListener('input', updatePreview);
+            });
+            flagsContainer.appendChild(flagsAddBtn);
+
+            const todosContainer = document.getElementById('todosContainer');
+            const todosAddBtn = document.getElementById('addTodoBtn');
+            todosContainer.innerHTML = '';
+            (template.todos || []).forEach(todoText => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3 todo-item';
+                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + todoText + '" placeholder="输入待办事项...">';
+                todosContainer.appendChild(div);
+                initCheckBtn(div.querySelector('.check-btn'));
+            });
+            todosContainer.appendChild(todosAddBtn);
+
+            const habitsContainer = document.getElementById('habitsContainer');
+            const habitsAddBtn = document.getElementById('addHabitBtn');
+            habitsContainer.innerHTML = '';
+            (template.habits || []).forEach(habitName => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between habit-item';
+                div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + habitName + '" placeholder="习惯名称..."><div class="flex gap-1 ml-3"><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">一</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">二</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">三</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">四</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">五</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">六</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">日</button></div>';
+                habitsContainer.appendChild(div);
+                div.querySelectorAll('.habit-check-btn').forEach(btn => {
+                    btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
+                });
+            });
+            habitsContainer.appendChild(habitsAddBtn);
+
+            Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
+            initSchedule(template.schedule || []);
+            
+            updateProgress();
+            updatePreview();
+            showToast('已加载「高效暑假模板」');
         }
 
-        function addWeeklyFlag() {
-            currentData.weeklyFlag.push({ text: '', checked: false });
-            renderWeeklyFlag();
-            renderPreview();
+        function getTemplateName(templateId) {
+            const names = { 'optimal-summer': '高效暑假模板' };
+            return names[templateId] || templateId;
         }
 
-        function removeFlag(index) {
-            currentData.weeklyFlag.splice(index, 1);
-            renderWeeklyFlag();
-            renderPreview();
+        function updateProgress() {
+            const flags = document.querySelectorAll('.flag-item');
+            const completedFlags = document.querySelectorAll('.flag-item .check-btn.checked').length;
+            document.getElementById('flagsProgress').textContent = completedFlags + '/' + flags.length;
+            document.getElementById('flagsBar').style.width = (flags.length > 0 ? (completedFlags / flags.length * 100) : 0) + '%';
+
+            const todos = document.querySelectorAll('.todo-item');
+            const completedTodos = document.querySelectorAll('.todo-item .check-btn.checked').length;
+            document.getElementById('todosProgress').textContent = completedTodos + '/' + todos.length;
+            document.getElementById('todosBar').style.width = (todos.length > 0 ? (completedTodos / todos.length * 100) : 0) + '%';
+
+            const habits = document.querySelectorAll('.habit-item');
+            let totalHabitChecks = 0, completedHabitChecks = 0;
+            habits.forEach(item => {
+                const checks = item.querySelectorAll('.habit-check-btn');
+                totalHabitChecks += checks.length;
+                completedHabitChecks += item.querySelectorAll('.habit-check-btn.bg-primary-500').length;
+            });
+            const habitsPercent = totalHabitChecks > 0 ? Math.round((completedHabitChecks / totalHabitChecks) * 100) : 0;
+            document.getElementById('habitsProgress').textContent = habitsPercent + '%';
+            document.getElementById('habitsBar').style.width = habitsPercent + '%';
         }
 
-        // ========== 渲染本周待办 ==========
-        function renderWeeklyTodo() {
-            const container = document.getElementById('weeklyTodo');
-            container.innerHTML = currentData.weeklyTodo.map((item, index) => `
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} 
-                        onchange="toggleTodo(${index})"
-                        class="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500">
-                    <input type="text" value="${item.text}" 
-                        onchange="updateTodo(${index}, this.value)"
-                        class="flex-1 px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    <button onclick="removeTodo(${index})" class="text-red-400 hover:text-red-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
+        function updatePreview() {
+            const flagsList = document.getElementById('previewFlags');
+            const flagInputs = document.querySelectorAll('.flag-item input');
+            flagsList.innerHTML = '';
+            flagInputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center gap-2';
+                    li.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary-500"></span> ' + value;
+                    flagsList.appendChild(li);
+                }
+            });
+            if (flagsList.children.length === 0) {
+                flagsList.innerHTML = '<li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span> 点击左侧添加</li>';
+            }
+            const goal = document.getElementById('stageGoal').value.trim();
+            document.getElementById('previewGoal').textContent = goal || '点击左侧添加目标';
         }
 
-        function toggleTodo(index) {
-            currentData.weeklyTodo[index].checked = !currentData.weeklyTodo[index].checked;
-            renderPreview();
+        function addFlag() {
+            saveToHistory();
+            const container = document.getElementById('flagsContainer');
+            const div = document.createElement('div');
+            div.className = 'flex items-start gap-3 flag-item fade-in';
+            div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标...">';
+            container.insertBefore(div, document.getElementById('addFlagBtn'));
+            initCheckBtn(div.querySelector('.check-btn'));
+            div.querySelector('input').addEventListener('input', updatePreview);
+            div.querySelector('input').focus();
         }
 
-        function updateTodo(index, value) {
-            currentData.weeklyTodo[index].text = value;
-            renderPreview();
-        }
-
-        function addWeeklyTodo() {
-            currentData.weeklyTodo.push({ text: '', checked: false });
-            renderWeeklyTodo();
-            renderPreview();
-        }
-
-        function removeTodo(index) {
-            currentData.weeklyTodo.splice(index, 1);
-            renderWeeklyTodo();
-            renderPreview();
-        }
-
-        // ========== 渲染时间轴表格 ==========
-        function renderTimeSlots() {
-            const tbody = document.getElementById('timeTableBody');
-            tbody.innerHTML = currentData.timeSlots.map((slot, slotIndex) => `
-                <tr class="border-b border-gray-100 dark:border-gray-700">
-                    <td class="time-cell px-2 py-2 font-medium text-xs">${slot.time}</td>
-                    ${slot.days.map((day, dayIndex) => `
-                        <td class="day-cell px-2 py-2">
-                            <input type="text" value="${day}" 
-                                onchange="updateTimeSlot(${slotIndex}, ${dayIndex}, this.value)"
-                                class="w-full px-1 py-1 text-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-600 rounded bg-transparent focus:outline-none focus:border-primary-500">
-                        </td>
-                    `).join('')}
-                </tr>
-            `).join('');
-        }
-
-        function updateTimeSlot(slotIndex, dayIndex, value) {
-            currentData.timeSlots[slotIndex].days[dayIndex] = value;
-            renderPreview();
-        }
-
-        // ========== 渲染习惯打卡 ==========
-        function renderHabits() {
-            const tbody = document.getElementById('habitTableBody');
-            tbody.innerHTML = currentData.habits.map((habit, habitIndex) => `
-                <tr class="habit-row border-b border-gray-100 dark:border-gray-700">
-                    <td class="px-2 py-2">
-                        <input type="text" value="${habit.name}" 
-                            onchange="updateHabitName(${habitIndex}, this.value)"
-                            class="w-full px-1 py-1 text-xs border border-transparent hover:border-gray-200 dark:hover:border-gray-600 rounded bg-transparent focus:outline-none focus:border-primary-500">
-                    </td>
-                    ${habit.days.map((checked, dayIndex) => `
-                        <td class="px-2 py-2">
-                            <div class="checkbox-cell w-6 h-6 mx-auto rounded border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs font-bold ${checked ? 'checked' : ''}"
-                                onclick="toggleHabit(${habitIndex}, ${dayIndex})">
-                                ${checked ? '✓' : ''}
-                            </div>
-                        </td>
-                    `).join('')}
-                </tr>
-            `).join('');
-        }
-
-        function toggleHabit(habitIndex, dayIndex) {
-            currentData.habits[habitIndex].days[dayIndex] = !currentData.habits[habitIndex].days[dayIndex];
-            renderHabits();
-            renderPreview();
-        }
-
-        function updateHabitName(habitIndex, value) {
-            currentData.habits[habitIndex].name = value;
-            renderPreview();
+        function addTodo() {
+            saveToHistory();
+            const container = document.getElementById('todosContainer');
+            const div = document.createElement('div');
+            div.className = 'flex items-start gap-3 todo-item fade-in';
+            div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项...">';
+            container.insertBefore(div, document.getElementById('addTodoBtn'));
+            initCheckBtn(div.querySelector('.check-btn'));
+            div.querySelector('input').focus();
         }
 
         function addHabit() {
-            currentData.habits.push({ name: '', days: [false, false, false, false, false, false, false] });
-            renderHabits();
-            renderPreview();
+            saveToHistory();
+            const container = document.getElementById('habitsContainer');
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between habit-item fade-in';
+            div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="习惯名称..."><div class="flex gap-1 ml-3"><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">一</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">二</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">三</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">四</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">五</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">六</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">日</button></div>';
+            container.appendChild(div);
+            div.querySelectorAll('.habit-check-btn').forEach(btn => {
+                btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
+            });
+            div.querySelector('input').focus();
         }
 
-        // ========== 渲染预览区 ==========
-        function renderPreview() {
-            // 阶段计划预览
-            document.getElementById('previewStage').innerHTML = `
-                <div><strong>大任务：</strong>${currentData.stageGoal}</div>
-                <div class="mt-1"><strong>阶段目标：</strong>${currentData.stageTasks}</div>
-            `;
-
-            // Flag预览
-            const flagHtml = currentData.weeklyFlag.map(item => `
-                <div class="${item.checked ? 'text-green-500' : ''}">
-                    ${item.checked ? '✓' : '○'} ${item.text || '空'}
-                </div>
-            `).join('');
-            document.getElementById('previewFlag').innerHTML = flagHtml || '<div class="text-gray-400">暂无Flag</div>';
-
-            // 待办预览
-            const todoHtml = currentData.weeklyTodo.map(item => `
-                <div class="${item.checked ? 'text-green-500' : ''}">
-                    ${item.checked ? '✓' : '○'} ${item.text || '空'}
-                </div>
-            `).join('');
-            document.getElementById('previewTodo').innerHTML = todoHtml || '<div class="text-gray-400">暂无待办</div>';
-
-            // 时间轴预览（简化显示）
-            const timeHtml = currentData.timeSlots.slice(0, 5).map(slot => `
-                <div class="mb-1">
-                    <span class="text-gray-500">${slot.time}</span>
-                    <span class="ml-2">${slot.days[0] || '-'}</span>
-                </div>
-            `).join('');
-            document.getElementById('previewTime').innerHTML = timeHtml + '<div class="text-xs text-gray-400 mt-1">...更多时段</div>';
-
-            // 习惯预览
-            let totalChecked = 0;
-            let totalSlots = 0;
-            const habitHtml = currentData.habits.map(habit => {
-                const count = habit.days.filter(d => d).length;
-                totalChecked += count;
-                totalSlots += 7;
-                return `<div>${habit.name}: ${count}/7</div>`;
-            }).join('');
-            document.getElementById('previewHabit').innerHTML = habitHtml || '<div class="text-gray-400">暂无习惯</div>';
-            document.getElementById('habitStats').innerHTML = `总完成率: ${totalSlots > 0 ? Math.round(totalChecked/totalSlots*100) : 0}%`;
-
-            // 复盘预览
-            const reflectionHtml = `
-                <div><strong>做得好的：</strong>${currentData.reflection.good || '待填写'}</div>
-                <div><strong>需改进：</strong>${currentData.reflection.bad || '待填写'}</div>
-                <div><strong>下周调整：</strong>${currentData.reflection.next || '待填写'}</div>
-            `;
-            document.getElementById('previewReflection').innerHTML = reflectionHtml;
+        function addTimeSlot() {
+            saveToHistory();
+            const tbody = document.getElementById('scheduleBody');
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-100 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card/50 transition-colors fade-in';
+            row.innerHTML = '<td class="py-3 px-4"><input type="text" class="w-20 text-gray-700 dark:text-gray-300 bg-transparent border-b border-gray-200 dark:border-dark-border focus:border-primary-400 dark:focus:border-primary-400 rounded-none px-0 py-1 text-sm font-medium text-gray-500 dark:text-gray-400 input-focus-ring" placeholder="时间" data-time-input></td><td class="py-3 px-4"><input type="text" class="schedule-input w-full text-gray-700 dark:text-gray-300 bg-transparent border-b border-gray-200 dark:border-dark-border focus:border-primary-400 dark:focus:border-primary-400 rounded-none px-0 py-1 text-sm input-focus-ring" placeholder="输入安排..." data-time-new></td>';
+            tbody.appendChild(row);
+            const timeInput = row.querySelector('[data-time-input]');
+            const scheduleInput = row.querySelector('[data-time-new]');
+            timeInput.addEventListener('change', function() {
+                const time = this.value;
+                if (time) {
+                    this.setAttribute('data-time', time);
+                    scheduleInput.setAttribute('data-time', time);
+                    Object.keys(scheduleData).forEach(day => {
+                        if (!scheduleData[day][time]) {
+                            scheduleData[day][time] = '';
+                        }
+                    });
+                    scheduleInput.value = scheduleData[currentDay][time];
+                }
+            });
+            scheduleInput.addEventListener('input', function() {
+                const time = this.dataset.time;
+                if (time) {
+                    scheduleData[currentDay][time] = this.value;
+                }
+            });
+            timeInput.focus();
         }
 
-        // ========== 复制计划 ==========
-        document.getElementById('copyBtn').addEventListener('click', async () => {
-            let text = `【暑假学习计划】\n\n`;
-            text += `🎯 阶段计划\n大任务：${currentData.stageGoal}\n阶段目标：${currentData.stageTasks}\n\n`;
-            text += `🚩 本周Flag\n${currentData.weeklyFlag.map((item, i) => `${i+1}. ${item.checked ? '✓' : '○'} ${item.text}`).join('\n')}\n\n`;
-            text += `📝 本周待办\n${currentData.weeklyTodo.map((item, i) => `${i+1}. ${item.checked ? '✓' : '○'} ${item.text}`).join('\n')}\n\n`;
-            text += `⏰ 每日时间轴\n${currentData.timeSlots.map(slot => `${slot.time}: ${slot.days.join(' | ')}`).join('\n')}\n\n`;
-            text += `✅ 习惯打卡\n${currentData.habits.map(h => `${h.name}: ${h.days.map(d => d ? '✓' : '○').join(' ')}`).join('\n')}\n\n`;
-            text += `🔄 周复盘\n做得好的：${currentData.reflection.good}\n需改进：${currentData.reflection.bad}\n下周调整：${currentData.reflection.next}`;
-
-            try {
-                await navigator.clipboard.writeText(text);
-                showToast('计划已复制到剪贴板');
-            } catch (err) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast('计划已复制到剪贴板');
-            }
-        });
-
-        // ========== 导出Excel ==========
-        document.getElementById('exportBtn').addEventListener('click', () => {
-            // 创建工作簿
-            const wb = XLSX.utils.book_new();
-
-            // === 总览工作表 ===
-            const overviewData = [];
-            overviewData.push(['暑假学习计划', '', '', '', '', '', '', '阶段计划']);
-            overviewData.push(['', '', '', '', '', '', '', '']);
-            overviewData.push(['本周Flag', '', '', '', '', '', '', '每日时间轴']);
-            currentData.weeklyFlag.forEach((item, i) => {
-                overviewData.push([i+1, item.text, '', '', '', '', '', i+1, currentData.timeSlots[i]?.days[0] || '']);
+        function initCheckBtn(btn) {
+            btn.addEventListener('click', function() {
+                saveToHistory();
+                this.classList.toggle('checked');
+                this.querySelector('svg').classList.toggle('opacity-0');
+                updateProgress();
             });
-            overviewData.push(['', '', '', '', '', '', '', '']);
-            overviewData.push(['本周待办', '', '', '', '', '', '', '阶段任务']);
-            currentData.weeklyTodo.forEach((item, i) => {
-                overviewData.push([i+1, item.text, '', '', '', '', '', currentData.stageTasks]);
-            });
-            overviewData.push(['', '', '', '', '', '', '', '']);
-            overviewData.push(['习惯打卡', '', '', '', '', '', '', '周复盘']);
-            overviewData.push(['早睡早起', '周一', '周二', '周三', '周四', '周五', '周六', '做得好的：\n' + currentData.reflection.good]);
-            currentData.habits.forEach(h => {
-                overviewData.push([h.name, ...h.days.map(d => d ? '✓' : ''), '', '', '', '', '', '需改进：\n' + currentData.reflection.bad]);
-            });
-
-            const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
-            wsOverview['!cols'] = [{wch:15}, {wch:20}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:8}, {wch:30}];
-            XLSX.utils.book_append_sheet(wb, wsOverview, '总览');
-
-            // === 周计划工作表 ===
-            const weekData = [];
-            weekData.push(['时段', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
-            currentData.timeSlots.forEach(slot => {
-                weekData.push([slot.time, ...slot.days]);
-            });
-
-            const wsWeek = XLSX.utils.aoa_to_sheet(weekData);
-            wsWeek['!cols'] = [{wch:12}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}, {wch:15}];
-            XLSX.utils.book_append_sheet(wb, wsWeek, '周计划');
-
-            // === 习惯打卡工作表 ===
-            const habitData = [];
-            habitData.push(['习惯', '周一', '周二', '周三', '周四', '周五', '周六', '周日', '完成率']);
-            currentData.habits.forEach(h => {
-                const rate = h.days.filter(d => d).length / 7;
-                habitData.push([h.name, ...h.days.map(d => d ? '✓' : ''), Math.round(rate*100) + '%']);
-            });
-
-            const wsHabit = XLSX.utils.aoa_to_sheet(habitData);
-            wsHabit['!cols'] = [{wch:12}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:6}, {wch:8}];
-            XLSX.utils.book_append_sheet(wb, wsHabit, '习惯打卡');
-
-            // 导出文件
-            XLSX.writeFile(wb, '暑假学习计划.xlsx');
-            showToast('Excel文件已导出');
-        });
-
-        // ========== 主题切换 ==========
-        const themeToggle = document.getElementById('themeToggle');
-        const sunIcon = document.getElementById('sunIcon');
-        const moonIcon = document.getElementById('moonIcon');
-
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const isDark = document.body.classList.contains('dark');
-            sunIcon.classList.toggle('hidden', !isDark);
-            moonIcon.classList.toggle('hidden', isDark);
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
-
-        // ========== 初始化主题 ==========
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                document.body.classList.add('dark');
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-            }
         }
 
-        // ========== Toast提示 ==========
         function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 px-3 py-2 bg-gray-800 text-white rounded-lg shadow-lg z-50 text-sm';
+            const toast = document.getElementById('toast');
             toast.textContent = message;
-            document.body.appendChild(toast);
+            toast.classList.remove('opacity-0');
             setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => document.body.removeChild(toast), 300);
+                toast.classList.add('opacity-0');
             }, 2000);
         }
 
-        // ========== 监听阶段计划编辑 ==========
-        document.getElementById('stageGoal').addEventListener('input', function() {
-            currentData.stageGoal = this.textContent;
-            renderPreview();
-        });
+        function exportExcel() {
+            const wb = XLSX.utils.book_new();
+            const stageGoal = document.getElementById('stageGoal').value;
+            const achievements = document.getElementById('achievements').value;
+            const nextWeek = document.getElementById('nextWeek').value;
+            const flags = [];
+            document.querySelectorAll('.flag-item').forEach(item => {
+                flags.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
+            });
+            const todos = [];
+            document.querySelectorAll('.todo-item').forEach(item => {
+                todos.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
+            });
+            const habits = [];
+            document.querySelectorAll('.habit-item').forEach(item => {
+                const days = [];
+                item.querySelectorAll('.habit-check-btn').forEach((btn, idx) => {
+                    days.push(btn.classList.contains('bg-primary-500') ? '✅' : '❌');
+                });
+                habits.push({ name: item.querySelector('input').value, days: days });
+            });
 
-        document.getElementById('stageTasks').addEventListener('input', function() {
-            currentData.stageTasks = this.textContent;
-            renderPreview();
-        });
+            const headerStyle = { fill: { fgColor: { rgb: '4A90A4' } }, font: { color: { rgb: 'FFFFFF' }, bold: true, size: 12 }, alignment: { horizontal: 'center', vertical: 'center' } };
+            const titleStyle = { fill: { fgColor: { rgb: '2563EB' } }, font: { color: { rgb: 'FFFFFF' }, bold: true, size: 14 }, alignment: { horizontal: 'center', vertical: 'center' } };
+            const sectionStyle = { fill: { fgColor: { rgb: 'E0F2FE' } }, font: { color: { rgb: '0369A1' }, bold: true, size: 11 }, alignment: { horizontal: 'center', vertical: 'center' } };
 
-        // ========== 监听复盘编辑 ==========
-        document.getElementById('reflectionGood').addEventListener('input', function() {
-            currentData.reflection.good = this.textContent;
-            renderPreview();
-        });
+            function addSheet(name, data, colWidths, merges) {
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                if (merges) ws['!merge'] = merges;
+                if (colWidths) ws['!cols'] = colWidths;
+                const titleRow = data.findIndex(row => row[0] && row[0].includes('📌') || row[0] && row[0].includes('�') || row[0] && row[0].includes('📋') || row[0] && row[0].includes('⏰') || row[0] && row[0].includes('🌱') || row[0] && row[0].includes('📝'));
+                if (titleRow !== -1) {
+                    for (let i = 0; i < data[titleRow].length; i++) {
+                        const cell = XLSX.utils.encode_cell({ r: titleRow, c: i });
+                        if (!ws[cell]) ws[cell] = {};
+                        Object.assign(ws[cell], titleStyle);
+                    }
+                }
+                const headerRow = data.findIndex(row => row[0] === '序号' || row[0] === '时间' || row[0] === '习惯名称');
+                if (headerRow !== -1) {
+                    for (let i = 0; i < data[headerRow].length; i++) {
+                        const cell = XLSX.utils.encode_cell({ r: headerRow, c: i });
+                        if (!ws[cell]) ws[cell] = {};
+                        Object.assign(ws[cell], headerStyle);
+                    }
+                }
+                XLSX.utils.book_append_sheet(wb, ws, name);
+            }
 
-        document.getElementById('reflectionBad').addEventListener('input', function() {
-            currentData.reflection.bad = this.textContent;
-            renderPreview();
-        });
+            const goalSheet = [];
+            goalSheet.push(['📌 阶段目标', '']);
+            goalSheet.push(['', '']);
+            goalSheet.push(['目标内容', stageGoal || '未填写']);
+            goalSheet.push(['', '']);
+            goalSheet.push(['创建时间', new Date().toLocaleString('zh-CN')]);
+            goalSheet.push(['模板类型', currentTemplate ? getTemplateName(currentTemplate) : '自定义']);
+            addSheet('阶段目标', goalSheet, [{ wch: 15 }, { wch: 60 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }]);
 
-        document.getElementById('reflectionNext').addEventListener('input', function() {
-            currentData.reflection.next = this.textContent;
-            renderPreview();
-        });
+            const flagSheet = [];
+            flagSheet.push(['🚩 本周重点', '', '', '']);
+            flagSheet.push(['', '', '', '']);
+            flagSheet.push(['序号', '重点内容', '状态', '备注']);
+            flags.forEach((f, idx) => {
+                flagSheet.push([idx + 1, f.text || '未填写', f.checked ? '已完成' : '未完成', '']);
+            });
+            if (flags.length === 0) {
+                flagSheet.push([1, '未填写', '未完成', '']);
+            }
+            addSheet('本周重点', flagSheet, [{ wch: 8 }, { wch: 45 }, { wch: 12 }, { wch: 20 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }]);
 
-        // ========== 初始化 ==========
-        function init() {
-            renderTemplates();
-            initTheme();
-            loadTemplate('template1');
+            const todoSheet = [];
+            todoSheet.push(['📋 待办清单', '', '', '']);
+            todoSheet.push(['', '', '', '']);
+            todoSheet.push(['序号', '待办事项', '状态', '备注']);
+            todos.forEach((t, idx) => {
+                todoSheet.push([idx + 1, t.text || '未填写', t.checked ? '已完成' : '未完成', '']);
+            });
+            if (todos.length === 0) {
+                todoSheet.push([1, '未填写', '未完成', '']);
+            }
+            addSheet('待办清单', todoSheet, [{ wch: 8 }, { wch: 45 }, { wch: 12 }, { wch: 20 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }]);
+
+            const scheduleSheet = [];
+            scheduleSheet.push(['⏰ 每日时间轴', '', '', '', '', '', '', '']);
+            scheduleSheet.push(['', '', '', '', '', '', '', '']);
+            scheduleSheet.push(['时间', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
+            const allTimes = new Set();
+            Object.values(scheduleData).forEach(dayData => { Object.keys(dayData).forEach(time => allTimes.add(time)); });
+            const sortedTimes = Array.from(allTimes).sort();
+            if (sortedTimes.length === 0) {
+                scheduleSheet.push(['暂无时间段', '未填写', '未填写', '未填写', '未填写', '未填写', '未填写', '未填写']);
+            } else {
+                sortedTimes.forEach(time => {
+                    const row = [time];
+                    ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                        row.push(scheduleData[day][time] || '未填写');
+                    });
+                    scheduleSheet.push(row);
+                });
+            }
+            addSheet('每日时间轴', scheduleSheet, [{ wch: 12 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }]);
+
+            const habitsSheet = [];
+            habitsSheet.push(['🌱 习惯打卡', '', '', '', '', '', '', '']);
+            habitsSheet.push(['', '', '', '', '', '', '', '']);
+            habitsSheet.push(['习惯名称', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
+            habits.forEach(h => {
+                habitsSheet.push([h.name || '未命名', ...h.days]);
+            });
+            if (habits.length === 0) {
+                habitsSheet.push(['未填写', '❌', '❌', '❌', '❌', '❌', '❌', '❌']);
+            }
+            habitsSheet.push(['', '', '', '', '', '', '', '']);
+            let habitCompleted = 0, habitTotal = 0;
+            habits.forEach(h => { h.days.forEach(d => { habitTotal++; if (d === '✅') habitCompleted++; }); });
+            const habitRate = habitTotal > 0 ? Math.round((habitCompleted / habitTotal) * 100) : 0;
+            habitsSheet.push(['完成统计', '', '', '', '', '', '', '']);
+            habitsSheet.push(['习惯总数', habits.length, '', '', '', '', '', '']);
+            habitsSheet.push(['打卡次数', habitCompleted + '/' + habitTotal, '', '', '', '', '', '']);
+            habitsSheet.push(['完成率', habitRate + '%', '', '', '', '', '', '']);
+            addSheet('习惯打卡', habitsSheet, [{ wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, { s: { r: habitsSheet.length - 4, c: 0 }, e: { r: habitsSheet.length - 4, c: 7 } }]);
+
+            const reflectionSheet = [];
+            reflectionSheet.push(['📝 周复盘', '', '']);
+            reflectionSheet.push(['', '', '']);
+            reflectionSheet.push(['本周成就', achievements || '未填写', '']);
+            reflectionSheet.push(['', '', '']);
+            reflectionSheet.push(['下周计划', nextWeek || '未填写', '']);
+            reflectionSheet.push(['', '', '']);
+            reflectionSheet.push(['💡 总结建议', '', '']);
+            const flagCompleted = flags.filter(f => f.checked).length;
+            if (flagCompleted === flags.length && flags.length > 0) reflectionSheet.push(['', '🎉 本周重点全部完成，继续保持！', '']);
+            else if (flagCompleted > 0) reflectionSheet.push(['', '👍 已完成部分重点，加油！', '']);
+            else reflectionSheet.push(['', '💪 开始制定你的计划吧！', '']);
+            addSheet('周复盘', reflectionSheet, [{ wch: 15 }, { wch: 55 }, { wch: 10 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, { s: { r: 6, c: 0 }, e: { r: 6, c: 1 } }]);
+
+            const dateStr = new Date().toISOString().slice(0, 10);
+            const fileName = '暑假学习计划_' + dateStr + '.xlsx';
+            XLSX.writeFile(wb, fileName);
+            showToast('Excel导出成功！');
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        function exportJson() {
+            const data = {
+                version: '1.0',
+                created: new Date().toISOString(),
+                currentTemplate: currentTemplate,
+                stageGoal: document.getElementById('stageGoal').value,
+                achievements: document.getElementById('achievements').value,
+                nextWeek: document.getElementById('nextWeek').value,
+                flags: [],
+                todos: [],
+                habits: [],
+                scheduleData: JSON.parse(JSON.stringify(scheduleData))
+            };
+            document.querySelectorAll('.flag-item').forEach(item => {
+                data.flags.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
+            });
+            document.querySelectorAll('.todo-item').forEach(item => {
+                data.todos.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
+            });
+            document.querySelectorAll('.habit-item').forEach(item => {
+                const days = [];
+                item.querySelectorAll('.habit-check-btn').forEach(btn => {
+                    days.push(btn.classList.contains('bg-primary-500'));
+                });
+                data.habits.push({ name: item.querySelector('input').value, days: days });
+            });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '暑假学习计划_' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('JSON导出成功！');
+        }
+
+        function scheduleAutoSave() {
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> 保存中...';
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                localStorage.setItem('summerPlanData', JSON.stringify(historyStack[historyIndex]));
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> 已保存';
+            }, 1000);
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('summerPlanData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    restoreFromHistory(data);
+                    showToast('已加载上次保存的数据');
+                } catch (e) {
+                    console.error('加载保存数据失败:', e);
+                }
+            }
+        }
+
+        function copyPlan() {
+            const stageGoal = document.getElementById('stageGoal').value;
+            const achievements = document.getElementById('achievements').value;
+            const nextWeek = document.getElementById('nextWeek').value;
+            let text = '📌 阶段目标\n' + (stageGoal || '未填写') + '\n\n';
+            text += '🚩 本周重点\n';
+            document.querySelectorAll('.flag-item').forEach(item => {
+                const checked = item.querySelector('.check-btn').classList.contains('checked');
+                text += (checked ? '✅' : '⬜') + ' ' + (item.querySelector('input').value || '未填写') + '\n';
+            });
+            text += '\n📋 待办清单\n';
+            document.querySelectorAll('.todo-item').forEach(item => {
+                const checked = item.querySelector('.check-btn').classList.contains('checked');
+                text += (checked ? '✅' : '⬜') + ' ' + (item.querySelector('input').value || '未填写') + '\n';
+            });
+            text += '\n🌱 习惯打卡\n';
+            document.querySelectorAll('.habit-item').forEach(item => {
+                const name = item.querySelector('input').value || '未命名';
+                const days = [];
+                item.querySelectorAll('.habit-check-btn').forEach((btn, idx) => {
+                    if (btn.classList.contains('bg-primary-500')) {
+                        days.push(['一', '二', '三', '四', '五', '六', '日'][idx]);
+                    }
+                });
+                text += name + ': ' + (days.join(' ') || '(未打卡)') + '\n';
+            });
+            text += '\n📝 周复盘\n本周成就: ' + (achievements || '未填写') + '\n下周计划: ' + (nextWeek || '未填写') + '\n';
+            navigator.clipboard.writeText(text).then(() => showToast('计划已复制到剪贴板')).catch(() => showToast('复制失败'));
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const btn = document.getElementById('themeBtn');
+            if (document.documentElement.classList.contains('dark')) {
+                btn.textContent = '☀️';
+                showToast('已切换到深色模式');
+            } else {
+                btn.textContent = '🌙';
+                showToast('已切换到浅色模式');
+            }
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        function loadTheme() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeBtn').textContent = '☀️';
+            }
+        }
+
+        function clearAll() {
+            if (!confirm('确定要清空所有内容吗？')) return;
+            saveToHistory();
+            document.getElementById('stageGoal').value = '';
+            document.querySelectorAll('.flag-item input').forEach(input => input.value = '');
+            document.querySelectorAll('.todo-item input').forEach(input => input.value = '');
+            document.getElementById('achievements').value = '';
+            document.getElementById('nextWeek').value = '';
+            document.querySelectorAll('.check-btn').forEach(btn => {
+                btn.classList.remove('checked');
+                btn.querySelector('svg').classList.add('opacity-0');
+            });
+            document.querySelectorAll('.habit-item').forEach(item => {
+                item.querySelector('input').value = '';
+                item.querySelectorAll('.habit-check-btn').forEach(btn => btn.classList.remove('bg-primary-500', 'text-white'));
+            });
+            Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
+            if (currentTemplate) {
+                loadTemplate(currentTemplate);
+            } else {
+                renderSchedule();
+                updateProgress();
+                updatePreview();
+            }
+            showToast('已清空所有内容');
+        }
+
+        function loadSampleData() {
+            saveToHistory();
+            document.getElementById('stageGoal').value = '暑假完成Python学习，掌握数据分析基础，读完3本好书';
+            document.querySelectorAll('.flag-item input')[0].value = '完成Python基础语法学习';
+            document.querySelectorAll('.flag-item input')[1].value = '做一个数据分析项目';
+            document.querySelectorAll('.flag-item input')[2].value = '每天背50个英语单词';
+            document.querySelectorAll('.todo-item input')[0].value = '整理学习笔记';
+            document.querySelectorAll('.todo-item input')[1].value = '复习上周内容';
+            document.querySelectorAll('.todo-item input')[2].value = '写一篇学习总结';
+            document.getElementById('achievements').value = '完成了Python基础课程，做了一个简单的数据分析项目';
+            document.getElementById('nextWeek').value = '开始学习机器学习基础，继续背单词';
+            document.querySelectorAll('.habit-item input')[0].value = '早起';
+            document.querySelectorAll('.habit-item input')[1].value = '阅读';
+            document.querySelectorAll('.habit-item input')[2].value = '运动';
+            document.querySelectorAll('.habit-item')[0].querySelectorAll('.habit-check-btn')[0].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[0].querySelectorAll('.habit-check-btn')[1].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[0].querySelectorAll('.habit-check-btn')[2].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[1].querySelectorAll('.habit-check-btn')[0].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[1].querySelectorAll('.habit-check-btn')[2].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[1].querySelectorAll('.habit-check-btn')[4].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[2].querySelectorAll('.habit-check-btn')[1].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[2].querySelectorAll('.habit-check-btn')[3].classList.add('bg-primary-500', 'text-white');
+            document.querySelectorAll('.habit-item')[2].querySelectorAll('.habit-check-btn')[5].classList.add('bg-primary-500', 'text-white');
+            scheduleData['mon']['08:00'] = '晨读英语';
+            scheduleData['mon']['09:00'] = 'Python学习';
+            scheduleData['mon']['14:00'] = '数据分析';
+            scheduleData['tue']['08:00'] = '晨读英语';
+            scheduleData['tue']['09:00'] = 'Python学习';
+            scheduleData['tue']['14:00'] = '项目实践';
+            renderSchedule();
+            updateProgress();
+            updatePreview();
+            showToast('已加载示例数据');
+        }
+
+        function applyImportedData(data) {
+            saveToHistory();
+            if (data.goal) document.getElementById('stageGoal').value = data.goal;
+            if (data.achievements) document.getElementById('achievements').value = data.achievements;
+            if (data.nextWeek) document.getElementById('nextWeek').value = data.nextWeek;
+
+            const flagsContainer = document.getElementById('flagsContainer');
+            const flagsAddBtn = document.getElementById('addFlagBtn');
+            flagsContainer.innerHTML = '';
+            (data.flags || []).forEach(flag => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3 flag-item';
+                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (flag.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (flag.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + (flag.text || '') + '" placeholder="输入重点目标...">';
+                flagsContainer.appendChild(div);
+                initCheckBtn(div.querySelector('.check-btn'));
+                div.querySelector('input').addEventListener('input', updatePreview);
+            });
+            flagsContainer.appendChild(flagsAddBtn);
+
+            const todosContainer = document.getElementById('todosContainer');
+            const todosAddBtn = document.getElementById('addTodoBtn');
+            todosContainer.innerHTML = '';
+            (data.todos || []).forEach(todo => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3 todo-item';
+                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (todo.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (todo.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + (todo.text || '') + '" placeholder="输入待办事项...">';
+                todosContainer.appendChild(div);
+                initCheckBtn(div.querySelector('.check-btn'));
+            });
+            todosContainer.appendChild(todosAddBtn);
+
+            const habitsContainer = document.getElementById('habitsContainer');
+            const habitsAddBtn = document.getElementById('addHabitBtn');
+            habitsContainer.innerHTML = '';
+            (data.habits || []).forEach(habit => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between habit-item';
+                let daysHtml = '';
+                const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+                (habit.days || [false, false, false, false, false, false, false]).forEach((checked, idx) => {
+                    daysHtml += '<button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors ' + (checked ? 'bg-primary-500 text-white' : '') + '">' + dayNames[idx] + '</button>';
+                });
+                div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + (habit.name || '') + '" placeholder="习惯名称..."><div class="flex gap-1 ml-3">' + daysHtml + '</div>';
+                habitsContainer.appendChild(div);
+                div.querySelectorAll('.habit-check-btn').forEach(btn => {
+                    btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
+                });
+            });
+            habitsContainer.appendChild(habitsAddBtn);
+
+            if (data.schedule) {
+                Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
+                Object.keys(data.schedule).forEach(time => {
+                    Object.keys(scheduleData).forEach(day => {
+                        scheduleData[day][time] = data.schedule[time] || '';
+                    });
+                });
+                renderSchedule();
+            }
+
+            updateProgress();
+            updatePreview();
+            showToast('导入成功');
+        }
+
+        function parseExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                        const result = parseTableData(jsonData);
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function parseWordFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    mammoth.extractRawText({ arrayBuffer: e.target.result })
+                        .then(function(result) {
+                            const text = result.value;
+                            const parsed = parseTextContent(text);
+                            resolve(parsed);
+                        })
+                        .catch(reject);
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function parseTextFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    const parsed = parseTextContent(text);
+                    resolve(parsed);
+                };
+                reader.onerror = reject;
+                reader.readAsText(file, 'utf-8');
+            });
+        }
+
+        function parseCsvFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    const rows = text.split('\n').map(row => {
+                        const result = [];
+                        let current = '';
+                        let inQuote = false;
+                        for (let i = 0; i < row.length; i++) {
+                            const char = row[i];
+                            if (char === '"' && (i === 0 || row[i-1] !== '\\')) {
+                                inQuote = !inQuote;
+                            } else if (char === ',' && !inQuote) {
+                                result.push(current);
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        result.push(current);
+                        return result;
+                    });
+                    const result = parseTableData(rows);
+                    resolve(result);
+                };
+                reader.onerror = reject;
+                reader.readAsText(file, 'utf-8');
+            });
+        }
+
+        function parseJsonFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        const result = {
+                            goal: data.stageGoal || data.goal || '',
+                            achievements: data.achievements || '',
+                            nextWeek: data.nextWeek || '',
+                            flags: data.flags || [],
+                            todos: data.todos || [],
+                            habits: data.habits || [],
+                            schedule: {}
+                        };
+                        if (data.scheduleData) {
+                            Object.keys(data.scheduleData).forEach(day => {
+                                Object.keys(data.scheduleData[day]).forEach(time => {
+                                    if (!result.schedule[time]) result.schedule[time] = '';
+                                });
+                            });
+                        }
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsText(file, 'utf-8');
+            });
+        }
+
+        function parseTableData(data) {
+            const result = { flags: [], todos: [], habits: [], schedule: {}, goal: '', achievements: '', nextWeek: '' };
+            let currentSection = '';
+
+            const goalKeywords = ['目标', 'goal', 'Goal', '目的', '计划目标', '总目标'];
+            const flagKeywords = ['重点', 'flag', 'Flag', '主要任务', '核心任务'];
+            const todoKeywords = ['待办', 'todo', 'Todo', '任务', '清单', '事项'];
+            const habitKeywords = ['习惯', 'habit', 'Habit', '日常', '打卡'];
+            const scheduleKeywords = ['时间', 'time', 'Time', '日程', '安排'];
+            const achievementKeywords = ['成就', 'achievement', '总结', '成果'];
+            const nextWeekKeywords = ['下周', 'next', 'Next', '未来'];
+
+            for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+
+                const firstCell = String(row[0] || '').trim().toLowerCase();
+                const originalFirstCell = String(row[0] || '').trim();
+
+                if (goalKeywords.some(k => originalFirstCell.includes(k))) {
+                    result.goal = String(row[row.length - 1] || row[1] || '').trim();
+                } else if (flagKeywords.some(k => firstCell.includes(k))) {
+                    currentSection = 'flags';
+                } else if (todoKeywords.some(k => firstCell.includes(k))) {
+                    currentSection = 'todos';
+                } else if (habitKeywords.some(k => firstCell.includes(k))) {
+                    currentSection = 'habits';
+                } else if (scheduleKeywords.some(k => firstCell.includes(k))) {
+                    currentSection = 'schedule';
+                } else if (achievementKeywords.some(k => firstCell.includes(k))) {
+                    result.achievements = String(row[row.length - 1] || row[1] || '').trim();
+                } else if (nextWeekKeywords.some(k => firstCell.includes(k))) {
+                    result.nextWeek = String(row[row.length - 1] || row[1] || '').trim();
+                } else if (currentSection === 'flags' && originalFirstCell && !originalFirstCell.startsWith('-') && !/^\d+$/.test(originalFirstCell)) {
+                    result.flags.push({ text: originalFirstCell, checked: false });
+                } else if (currentSection === 'todos' && originalFirstCell && !originalFirstCell.startsWith('-') && !/^\d+$/.test(originalFirstCell)) {
+                    result.todos.push({ text: originalFirstCell, checked: false });
+                } else if (currentSection === 'habits' && originalFirstCell) {
+                    result.habits.push({ name: originalFirstCell, days: [false, false, false, false, false, false, false] });
+                } else if (currentSection === 'schedule' && /^\d{1,2}:\d{2}$/.test(originalFirstCell)) {
+                    result.schedule[originalFirstCell] = row[1] ? String(row[1]).trim() : '';
+                } else if (/^\d{1,2}:\d{2}/.test(originalFirstCell)) {
+                    const timeMatch = originalFirstCell.match(/^\d{1,2}:\d{2}/);
+                    if (timeMatch) {
+                        result.schedule[timeMatch[0]] = originalFirstCell.replace(timeMatch[0], '').trim() || (row[1] ? String(row[1]).trim() : '');
+                    }
+                } else if (originalFirstCell && !currentSection && !/^[\d\.\-*+]$/.test(originalFirstCell)) {
+                    if (result.flags.length < 5) {
+                        result.flags.push({ text: originalFirstCell, checked: false });
+                    } else if (result.todos.length < 5) {
+                        result.todos.push({ text: originalFirstCell, checked: false });
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        function parseTextContent(text) {
+            const result = { flags: [], todos: [], habits: [], schedule: {}, goal: '', achievements: '', nextWeek: '' };
+            const lines = text.split('\n');
+            let currentSection = '';
+
+            const goalKeywords = ['目标', 'goal', 'Goal', '目的', '计划目标'];
+            const flagKeywords = ['重点', 'flag', 'Flag', '主要任务'];
+            const todoKeywords = ['待办', 'todo', 'Todo', '任务', '清单'];
+            const habitKeywords = ['习惯', 'habit', 'Habit', '日常'];
+            const scheduleKeywords = ['时间', 'time', 'Time', '日程'];
+            const achievementKeywords = ['成就', 'achievement', '总结'];
+            const nextWeekKeywords = ['下周', 'next', 'Next'];
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                if (goalKeywords.some(k => line.includes(k))) {
+                    result.goal = line.replace(/^.*[目标目的]\s*[：:]\s*/, '').replace(/^[目标【】\s]+/, '');
+                } else if (flagKeywords.some(k => line.includes(k))) {
+                    currentSection = 'flags';
+                } else if (todoKeywords.some(k => line.includes(k))) {
+                    currentSection = 'todos';
+                } else if (habitKeywords.some(k => line.includes(k))) {
+                    currentSection = 'habits';
+                } else if (scheduleKeywords.some(k => line.includes(k))) {
+                    currentSection = 'schedule';
+                } else if (achievementKeywords.some(k => line.includes(k))) {
+                    result.achievements = line.replace(/^.*[成就总结]\s*[：:]\s*/, '');
+                } else if (nextWeekKeywords.some(k => line.includes(k))) {
+                    result.nextWeek = line.replace(/^.*[下周]\s*[：:]\s*/, '');
+                } else if (line.match(/^[\d\.\-*+•]\s+/)) {
+                    const content = line.replace(/^[\d\.\-*+•]\s+/, '');
+                    if (currentSection === 'flags') {
+                        result.flags.push({ text: content, checked: false });
+                    } else if (currentSection === 'todos') {
+                        result.todos.push({ text: content, checked: false });
+                    } else if (currentSection === 'habits') {
+                        result.habits.push({ name: content, days: [false, false, false, false, false, false, false] });
+                    } else if (!currentSection) {
+                        if (result.flags.length < 5) {
+                            result.flags.push({ text: content, checked: false });
+                        } else {
+                            result.todos.push({ text: content, checked: false });
+                        }
+                    }
+                } else if (line.match(/^\d{1,2}:\d{2}/)) {
+                    const timeMatch = line.match(/^\d{1,2}:\d{2}/);
+                    if (timeMatch) {
+                        result.schedule[timeMatch[0]] = line.replace(timeMatch[0], '').trim();
+                    }
+                } else if (line.match(/^[周一二三四五六日]\s*[：:]/)) {
+                    currentSection = 'schedule';
+                } else if (!currentSection && line.length > 2 && line.length < 50) {
+                    if (result.flags.length < 5) {
+                        result.flags.push({ text: line, checked: false });
+                    }
+                }
+            });
+
+            return result;
+        }
+
+        async function handleFileImport(file) {
+            try {
+                showToast('正在解析文件...');
+                let data;
+
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    data = await parseExcelFile(file);
+                } else if (file.name.endsWith('.docx')) {
+                    data = await parseWordFile(file);
+                } else if (file.name.endsWith('.csv')) {
+                    data = await parseCsvFile(file);
+                } else if (file.name.endsWith('.txt')) {
+                    data = await parseTextFile(file);
+                } else if (file.name.endsWith('.json')) {
+                    data = await parseJsonFile(file);
+                } else {
+                    showToast('不支持的文件格式');
+                    return;
+                }
+
+                applyImportedData(data);
+            } catch (error) {
+                console.error('导入失败:', error);
+                showToast('导入失败，请检查文件格式');
+            }
+        }
+
+        function initEventListeners() {
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.addEventListener('click', function() { loadTemplate(this.dataset.template); });
+            });
+
+            document.getElementById('addFlagBtn').addEventListener('click', addFlag);
+            document.getElementById('addTodoBtn').addEventListener('click', addTodo);
+            document.getElementById('addHabitBtn').addEventListener('click', addHabit);
+            document.getElementById('addTimeSlotBtn').addEventListener('click', addTimeSlot);
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('tab-active'); b.classList.add('text-gray-500', 'dark:text-gray-400'); });
+                    this.classList.add('tab-active');
+                    this.classList.remove('text-gray-500', 'dark:text-gray-400');
+                    currentDay = this.dataset.day;
+                    renderSchedule();
+                });
+            });
+
+            document.getElementById('undoBtn').addEventListener('click', undo);
+            document.getElementById('copyBtn').addEventListener('click', copyPlan);
+            document.getElementById('exportBtn').addEventListener('click', exportExcel);
+            document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
+            document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+            document.getElementById('clearBtn').addEventListener('click', clearAll);
+            document.getElementById('loadSampleBtn').addEventListener('click', loadSampleData);
+
+            document.getElementById('stageGoal').addEventListener('input', function() { saveToHistory(); updatePreview(); });
+            document.getElementById('achievements').addEventListener('input', saveToHistory);
+            document.getElementById('nextWeek').addEventListener('input', saveToHistory);
+
+            document.getElementById('dropZone').addEventListener('click', function() {
+                document.getElementById('importFile').click();
+            });
+
+            document.getElementById('selectFileBtn').addEventListener('click', function() {
+                document.getElementById('importFile').click();
+            });
+
+            document.getElementById('importFile').addEventListener('change', function(e) {
+                if (e.target.files[0]) {
+                    handleFileImport(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('dropZone').addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            document.getElementById('dropZone').addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+            });
+
+            document.getElementById('dropZone').addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                if (e.dataTransfer.files[0]) {
+                    handleFileImport(e.dataTransfer.files[0]);
+                }
+            });
+
+            document.getElementById('pasteTextBtn').addEventListener('click', function() {
+                document.getElementById('pasteModal').classList.remove('opacity-0', 'pointer-events-none');
+            });
+
+            document.getElementById('closePasteModal').addEventListener('click', function() {
+                document.getElementById('pasteModal').classList.add('opacity-0', 'pointer-events-none');
+            });
+
+            document.getElementById('cancelPasteBtn').addEventListener('click', function() {
+                document.getElementById('pasteModal').classList.add('opacity-0', 'pointer-events-none');
+            });
+
+            document.getElementById('confirmPasteBtn').addEventListener('click', function() {
+                const text = document.getElementById('pasteTextArea').value;
+                if (text.trim()) {
+                    const data = parseTextContent(text);
+                    applyImportedData(data);
+                }
+                document.getElementById('pasteModal').classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('pasteTextArea').value = '';
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                    e.preventDefault();
+                    undo();
+                }
+            });
+
+            renderSchedule();
+            updateProgress();
+            updatePreview();
+            loadTheme();
+            loadFromStorage();
+        }
+
+        initEventListeners();
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
