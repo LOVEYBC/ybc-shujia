@@ -3,1361 +3,1705 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暑假学习计划 - 智能版</title>
+    <title>暑假学习计划</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Segoe UI', 'Roboto', 'system-ui', 'sans-serif'],
+                    },
                     colors: {
-                        primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        dark: {
-                            bg: '#1a1a2e',
-                            card: '#16213e',
-                            border: '#0f3460',
+                        apple: {
+                            blue: '#007AFF',
+                            indigo: '#5856D6',
+                            purple: '#AF52DE',
+                            pink: '#FF2D55',
+                            red: '#FF3B30',
+                            orange: '#FF9500',
+                            yellow: '#FFCC00',
+                            green: '#34C759',
+                            teal: '#5AC8FA',
+                            gray: '#8E8E93',
+                            bg: '#F5F5F7',
+                            card: 'rgba(255, 255, 255, 0.72)',
+                            cardDark: 'rgba(28, 28, 30, 0.72)',
                         }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    boxShadow: {
+                        'apple': '0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
+                        'apple-lg': '0 12px 48px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)',
+                        'glow': '0 0 40px rgba(0, 122, 255, 0.15)',
                     },
+                    borderRadius: {
+                        'apple': '1.25rem',
+                        'apple-xl': '1.5rem',
+                    }
                 },
             },
         }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', system-ui, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
-        .dark body { background-color: #1a1a2e; color: #e2e8f0; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .dark .glass { background: rgba(22, 33, 62, 0.8); border: 1px solid rgba(15, 52, 96, 0.5); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 3px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
-        .input-focus-ring:focus { outline: none; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
-        .dark .input-focus-ring:focus { box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
-        .check-circle { transition: all 0.2s ease; }
-        .check-circle.checked { background-color: #0ea5e9; border-color: #0ea5e9; }
-        .dark .check-circle.checked { background-color: #38bdf8; border-color: #38bdf8; }
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .tab-active { border-bottom: 2px solid #0ea5e9; color: #0ea5e9; }
-        .dark .tab-active { border-bottom: 2px solid #38bdf8; color: #38bdf8; }
-        .drag-over { border-color: #0ea5e9 !important; background-color: rgba(14, 165, 233, 0.05) !important; }
-        .dark .drag-over { background-color: rgba(56, 189, 248, 0.1) !important; }
-        .save-indicator { transition: opacity 0.3s; }
-        .save-indicator.saving { opacity: 1; }
-        .save-indicator.saved { opacity: 0.5; }
+        
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, system-ui, sans-serif;
+            transition: background 0.5s ease;
+        }
+        
+        /* 动态背景层 */
+        #bgLayer {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            transition: all 0.5s ease;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        #bgLayer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-overlay, rgba(255,255,255,0));
+            transition: all 0.5s ease;
+        }
+        
+        /* 苹果风格玻璃拟态 */
+        .glass {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .dark .glass {
+            background: rgba(28, 28, 30, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+        
+        .dark .glass-card {
+            background: rgba(28, 28, 30, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 自定义滚动条 */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); border-radius: 100px; border: 2px solid transparent; background-clip: padding-box; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+        
+        /* 输入框焦点 */
+        .input-apple {
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .input-apple:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+            border-color: rgba(0, 122, 255, 0.4);
+        }
+        .dark .input-apple:focus {
+            background: rgba(44, 44, 46, 0.9);
+            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18);
+        }
+        
+        /* 按钮按压效果 */
+        .btn-apple {
+            transition: all 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .btn-apple:active {
+            transform: scale(0.96);
+        }
+        
+        /* 勾选动画 */
+        .check-circle { transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        .check-circle.checked {
+            background: linear-gradient(135deg, #007AFF 0%, #00C6FF 100%);
+            border-color: transparent;
+        }
+        .dark .check-circle.checked {
+            background: linear-gradient(135deg, #0A84FF 0%, #64D2FF 100%);
+        }
+        
+        /* 卡片入场动画 */
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(16px) scale(0.98); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        
+        /* 背景预设 */
+        .bg-preset-default { background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%); }
+        .bg-preset-ocean { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .bg-preset-sunset { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .bg-preset-forest { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .bg-preset-midnight { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+        .bg-preset-sky { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+        .bg-preset-candy { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+        .bg-preset-dark { background: #000000; }
+        
+        /* 背景选择器 */
+        .bg-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .bg-option:hover { transform: scale(1.08); }
+        .bg-option.active { box-shadow: 0 0 0 3px #007AFF; transform: scale(1.08); }
+        
+        /* 表格样式 */
+        .schedule-table th, .schedule-table td {
+            border: none;
+        }
+        .schedule-table tbody tr {
+            transition: background 0.2s ease;
+        }
+        .schedule-table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .dark .schedule-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        
+        /* 导航模糊 */
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .dark .nav-glass {
+            background: rgba(28, 28, 30, 0.65);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* 浮动背景设置面板 */
+        .settings-panel {
+            transform: translateY(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .settings-panel.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Toast */
+        .toast-apple {
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
     </style>
 </head>
-<body class="bg-white min-h-screen">
-    <div class="min-h-screen flex flex-col">
-        <header class="sticky top-0 z-50 glass border-b border-gray-100 dark:border-dark-border">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold text-lg">✏️</div>
-                    <div>
-                        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">暑假计划</h1>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">智能导入 · 自动保存 · 精美导出</p>
+<body class="text-gray-800 dark:text-gray-100 min-h-screen">
+    <!-- 动态背景层 -->
+    <div id="bgLayer" class="bg-preset-default"></div>
+    
+    <div class="min-h-screen flex flex-col relative">
+        <!-- 顶部导航 -->
+        <header class="sticky top-0 z-50 nav-glass">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+                <div class="flex items-center gap-3.5 cursor-pointer" id="planSwitcher">
+                    <div class="w-11 h-11 rounded-apple-xl bg-gradient-to-br from-apple-blue to-cyan-400 flex items-center justify-center text-white shadow-glow">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                     </div>
+                    <div>
+                        <h1 class="text-lg font-semibold tracking-tight text-gray-900 dark:text-white" id="currentPlanName">暑假计划</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">粘贴导入 · 自动保存 · Excel导出</p>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span id="saveStatus" class="text-xs text-gray-400 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> 已保存</span>
-                    <button id="undoBtn" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-50 dark:bg-dark-card rounded-lg transition-colors disabled:opacity-40" disabled>↩️ 撤销</button>
-                    <button id="copyBtn" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-50 dark:bg-dark-card rounded-lg transition-colors">📋 复制</button>
-                    <button id="exportBtn" class="px-3 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">📊 导出Excel</button>
-                    <button id="exportJsonBtn" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 bg-gray-50 dark:bg-dark-card rounded-lg transition-colors">💾 导出JSON</button>
-                    <button id="themeBtn" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-dark-card flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border transition-colors">🌙</button>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <span id="saveStatus" class="text-xs text-gray-500 dark:text-gray-400 font-medium items-center gap-1.5 hidden sm:flex">
+                        <span class="w-1.5 h-1.5 rounded-full bg-apple-green"></span>
+                        已保存
+                    </span>
+                    <button id="pasteBtn" class="btn-apple px-4 py-2 text-sm font-medium text-white bg-apple-blue hover:bg-blue-600 rounded-xl shadow-apple flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span class="hidden sm:inline">粘贴导入</span>
+                    </button>
+                    <button id="exportBtn" class="btn-apple px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 rounded-xl shadow-apple border border-white/50 dark:border-white/10 flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="hidden sm:inline">导出Excel</span>
+                    </button>
+                    <button id="bgSettingsBtn" class="btn-apple px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 rounded-xl shadow-apple border border-white/50 dark:border-white/10" title="自定义背景">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </button>
+                    <button id="clearBtn" class="btn-apple px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-white/10 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/20 dark:hover:text-red-400 rounded-xl shadow-apple border border-white/50 dark:border-white/10" title="清空内容">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <div class="flex-1 flex">
-            <aside class="w-64 shrink-0 border-r border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-bg/50 p-4 overflow-y-auto custom-scrollbar">
-                <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">自创模板</h2>
-                <div class="space-y-2">
-                    <button class="template-btn w-full text-left px-4 py-3 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border hover:border-primary-300 dark:hover:border-primary-500 hover:shadow-sm transition-all" data-template="optimal-summer">
+        <!-- 主内容区 -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8">
+            <div class="max-w-6xl mx-auto space-y-6">
+                <!-- 阶段目标 -->
+                <div class="glass-card rounded-apple-xl p-6 fade-in" style="animation-delay: 0ms;">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-md">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold tracking-tight">阶段目标</h2>
+                    </div>
+                    <textarea id="stageGoal" class="w-full h-24 p-4 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-apple resize-none input-apple text-sm leading-relaxed" placeholder="这个暑假，我想达成什么目标？..."></textarea>
+                </div>
+
+                <!-- 本周重点 + 待办清单 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 本周重点 -->
+                    <div class="glass-card rounded-apple-xl p-6 fade-in" style="animation-delay: 60ms;">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-8a2 2 0 012-2h14a2 2 0 012 2v8M3 21h18M5 21v-8a2 2 0 012-2h14a2 2 0 012 2v8"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-lg font-semibold tracking-tight">本周重点</h2>
+                        </div>
+                        <div class="space-y-3" id="flagsContainer">
+                            <div class="flex items-start gap-3 flag-item">
+                                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" placeholder="输入重点目标...">
+                            </div>
+                            <div class="flex items-start gap-3 flag-item">
+                                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" placeholder="输入重点目标...">
+                            </div>
+                            <div class="flex items-start gap-3 flag-item">
+                                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" placeholder="输入重点目标...">
+                            </div>
+                            <button id="addFlagBtn" class="w-full py-2.5 text-sm font-medium text-apple-blue dark:text-blue-400 hover:bg-apple-blue/10 rounded-xl transition-colors flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                添加重点
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 待办清单 -->
+                    <div class="glass-card rounded-apple-xl p-6 fade-in" style="animation-delay: 120ms;">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-lg font-semibold tracking-tight">待办清单</h2>
+                        </div>
+                        <div class="space-y-3" id="todosContainer">
+                            <div class="flex items-start gap-3 todo-item">
+                                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" placeholder="输入待办事项...">
+                            </div>
+                            <div class="flex items-start gap-3 todo-item">
+                                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" placeholder="输入待办事项...">
+                            </div>
+                            <div class="flex items-start gap-3 todo-item">
+                                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" placeholder="输入待办事项...">
+                            </div>
+                            <button id="addTodoBtn" class="w-full py-2.5 text-sm font-medium text-apple-blue dark:text-blue-400 hover:bg-apple-blue/10 rounded-xl transition-colors flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                添加待办
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 每日时间轴 -->
+                <div class="glass-card rounded-apple-xl p-6 fade-in" style="animation-delay: 180ms;">
+                    <div class="flex items-center justify-between mb-5">
                         <div class="flex items-center gap-3">
-                            <span class="text-2xl">☀️</span>
-                            <div>
-                                <div class="font-medium text-gray-800 dark:text-white">高效暑假模板</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">学习+休息+复盘 三合一</div>
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                             </div>
+                            <h2 class="text-lg font-semibold tracking-tight">每日时间轴</h2>
                         </div>
-                    </button>
-                </div>
-
-                <div class="mt-6">
-                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">导入数据</h2>
-                    <div class="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-xl p-4 text-center hover:border-primary-400 dark:hover:border-primary-400 transition-colors cursor-pointer" id="dropZone">
-                        <div class="text-4xl mb-2">📥</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-300">拖拽文件到此处</div>
-                        <div class="text-xs text-gray-400 mt-1">支持 Excel/Word/CSV/TXT/JSON</div>
-                        <input type="file" id="importFile" class="hidden" accept=".xlsx,.xls,.docx,.csv,.txt,.json">
+                        <button id="addTimeSlotBtn" class="btn-apple px-4 py-2 text-sm font-medium text-apple-blue dark:text-blue-400 bg-apple-blue/10 hover:bg-apple-blue/20 rounded-xl transition-colors flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            添加时间段
+                        </button>
                     </div>
-                    <button id="selectFileBtn" class="mt-3 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">📁 选择文件</button>
-                    <button id="pasteTextBtn" class="mt-2 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">📋 粘贴文本</button>
-                </div>
-
-                <div class="mt-6">
-                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">快捷操作</h2>
-                    <button id="clearBtn" class="w-full px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">🗑️ 清空所有内容</button>
-                    <button id="loadSampleBtn" class="mt-2 w-full px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">📝 加载示例数据</button>
-                </div>
-            </aside>
-
-            <main class="flex-1 overflow-y-auto custom-scrollbar p-6">
-                <div class="max-w-4xl mx-auto space-y-6">
-                    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
-                        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">📌 阶段目标</h2>
-                        <textarea id="stageGoal" class="w-full h-24 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl resize-none input-focus-ring transition-all" placeholder="这个暑假，我想达成什么目标？..."></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">🚩 本周重点</h2>
-                            <div class="space-y-3" id="flagsContainer">
-                                <div class="flex items-start gap-3 flag-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标..."></div>
-                                <div class="flex items-start gap-3 flag-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标..."></div>
-                                <div class="flex items-start gap-3 flag-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标..."></div>
-                                <button id="addFlagBtn" class="w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加重点</button>
-                            </div>
-                        </div>
-
-                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">📋 待办清单</h2>
-                            <div class="space-y-3" id="todosContainer">
-                                <div class="flex items-start gap-3 todo-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项..."></div>
-                                <div class="flex items-start gap-3 todo-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项..."></div>
-                                <div class="flex items-start gap-3 todo-item"><button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项..."></div>
-                                <button id="addTodoBtn" class="w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加待办</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">⏰ 每日时间轴</h2>
-                            <div class="flex gap-2">
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors tab-active" data-day="mon">周一</button>
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="tue">周二</button>
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="wed">周三</button>
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="thu">周四</button>
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="fri">周五</button>
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="sat">周六</button>
-                                <button class="tab-btn text-sm font-medium px-3 py-1 rounded-lg transition-colors text-gray-500 dark:text-gray-400" data-day="sun">周日</button>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full" id="scheduleTable">
-                                <thead><tr class="border-b border-gray-200 dark:border-dark-border"><th class="text-left py-3 px-4 text-sm font-semibold text-gray-500 dark:text-gray-400 w-20">时间</th><th class="text-left py-3 px-4 text-sm font-semibold text-gray-500 dark:text-gray-400">安排</th></tr></thead>
-                                <tbody id="scheduleBody"></tbody>
-                            </table>
-                        </div>
-                        <button id="addTimeSlotBtn" class="mt-4 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加时间段</button>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">🌱 习惯打卡</h2>
-                            <div class="space-y-3" id="habitsContainer">
-                                <div class="flex items-center justify-between habit-item">
-                                    <input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="习惯名称...">
-                                    <div class="flex gap-1 ml-3">
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">一</button>
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">二</button>
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">三</button>
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">四</button>
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">五</button>
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">六</button>
-                                        <button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">日</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button id="addHabitBtn" class="mt-4 w-full py-2 text-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">+ 添加习惯</button>
-                        </div>
-
-                        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-100 dark:border-dark-border p-6 shadow-sm">
-                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">📝 周复盘</h2>
-                            <div class="space-y-3">
-                                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">本周成就</label><textarea class="w-full h-20 p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg resize-none text-sm input-focus-ring" id="achievements" placeholder="这一周我完成了什么？..."></textarea></div>
-                                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">下周计划</label><textarea class="w-full h-20 p-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg resize-none text-sm input-focus-ring" id="nextWeek" placeholder="下一周我要做什么？..."></textarea></div>
-                            </div>
-                        </div>
+                    <div class="overflow-x-auto -mx-2 px-2">
+                        <table class="w-full schedule-table" id="scheduleTable">
+                            <thead>
+                                <tr class="text-left">
+                                    <th class="py-3 px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">时间</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center min-w-[84px]">周一</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center min-w-[84px]">周二</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center min-w-[84px]">周三</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center min-w-[84px]">周四</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center min-w-[84px]">周五</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-apple-blue dark:text-blue-400 uppercase tracking-wider text-center min-w-[84px]">周六</th>
+                                    <th class="py-3 px-2 text-xs font-semibold text-apple-blue dark:text-blue-400 uppercase tracking-wider text-center min-w-[84px]">周日</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleBody">
+                                <tr>
+                                    <td colspan="8" class="py-12 text-center text-gray-400 dark:text-gray-500 text-sm">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span>点击「添加时间段」开始规划</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </main>
+            </div>
+        </main>
+    </div>
 
-            <aside class="w-72 shrink-0 border-l border-gray-100 dark:border-dark-border bg-gray-50/50 dark:bg-dark-bg/50 p-4 overflow-y-auto custom-scrollbar">
-                <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">📊 进度概览</h2>
-                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mb-4">
-                    <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600 dark:text-gray-300">本周重点</span><span id="flagsProgress" class="text-sm font-semibold text-primary-500">0/3</span></div>
-                    <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden"><div id="flagsBar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%"></div></div>
-                </div>
-                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mb-4">
-                    <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600 dark:text-gray-300">待办清单</span><span id="todosProgress" class="text-sm font-semibold text-primary-500">0/3</span></div>
-                    <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden"><div id="todosBar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%"></div></div>
-                </div>
-                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mb-4">
-                    <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600 dark:text-gray-300">习惯完成率</span><span id="habitsProgress" class="text-sm font-semibold text-primary-500">0%</span></div>
-                    <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden"><div id="habitsBar" class="h-full bg-primary-500 transition-all duration-300" style="width: 0%"></div></div>
-                </div>
-                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4">
-                    <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-3">本周重点</h3>
-                    <ul id="previewFlags" class="space-y-2 text-sm text-gray-600 dark:text-gray-300"><li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span> 点击左侧添加</li></ul>
-                </div>
-                <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border p-4 mt-4">
-                    <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-3">阶段目标</h3>
-                    <p id="previewGoal" class="text-sm text-gray-600 dark:text-gray-300">点击左侧添加目标</p>
-                </div>
-            </aside>
+    <!-- Toast 提示 -->
+    <div id="toast" class="fixed bottom-6 right-6 px-5 py-3 toast-apple text-white rounded-2xl shadow-apple-lg opacity-0 pointer-events-none transition-all duration-300 z-50 text-sm font-medium translate-y-2">操作成功</div>
+
+    <!-- 粘贴导入弹窗 -->
+    <div id="pasteModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-apple-xl p-6 w-full max-w-lg mx-4 shadow-apple-lg transform scale-95 transition-transform duration-300" id="pasteModalContent">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold tracking-tight">粘贴文字导入计划</h3>
+                <button id="closePasteModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <textarea id="pasteTextArea" class="w-full h-56 p-4 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-apple resize-none input-apple text-sm leading-relaxed" placeholder="把 AI 生成的文字计划粘贴到这里...&#10;&#10;支持自动识别：目标、重点、待办、时间安排等内容"></textarea>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-3 flex items-start gap-1.5">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                示例格式：目标：xxx | 重点：1. xxx | 待办：- xxx | 时间：08:00 学习
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button id="cancelPasteBtn" class="flex-1 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 rounded-xl transition-colors">取消</button>
+                <button id="confirmPasteBtn" class="flex-1 py-2.5 text-sm font-medium text-white bg-apple-blue hover:bg-blue-600 rounded-xl transition-colors shadow-apple">确认导入</button>
+            </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 right-6 px-6 py-3 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 rounded-xl shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">操作成功</div>
+    <!-- 背景设置弹窗 -->
+    <div id="bgModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-apple-xl p-6 w-full max-w-md mx-4 shadow-apple-lg transform scale-95 transition-transform duration-300" id="bgModalContent">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-semibold tracking-tight">自定义背景</h3>
+                <button id="closeBgModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-5">
+                <!-- 预设背景 -->
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 block">预设背景</label>
+                    <div class="grid grid-cols-5 gap-3">
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-default shadow-apple active" data-bg="default" title="默认"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-ocean shadow-apple" data-bg="ocean" title="海洋"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-sunset shadow-apple" data-bg="sunset" title="日落"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-forest shadow-apple" data-bg="forest" title="森林"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-sky shadow-apple" data-bg="sky" title="天空"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-candy shadow-apple" data-bg="candy" title="糖果"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-midnight shadow-apple" data-bg="midnight" title="午夜"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-preset-dark shadow-apple" data-bg="dark" title="纯黑"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-gradient-to-br from-white to-gray-200 shadow-apple" data-bg="light" title="纯白"></div>
+                        <div class="bg-option w-12 h-12 rounded-full bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-400 shadow-apple" data-bg="aurora" title="极光"></div>
+                    </div>
+                </div>
+                
+                <!-- 自定义颜色 -->
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 block">自定义颜色</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="bgColorPicker" class="w-14 h-10 rounded-xl border-0 cursor-pointer bg-transparent" value="#f5f7fa">
+                        <input type="text" id="bgColorText" class="flex-1 px-3.5 py-2 text-sm bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl input-apple" placeholder="#f5f7fa 或 rgb(245,247,250)">
+                        <button id="applyBgColor" class="px-4 py-2 text-sm font-medium text-white bg-apple-blue hover:bg-blue-600 rounded-xl transition-colors">应用</button>
+                    </div>
+                </div>
+                
+                <!-- 上传图片 -->
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 block">上传图片</label>
+                    <div class="relative">
+                        <input type="file" id="bgImageInput" accept="image/*" class="hidden">
+                        <label for="bgImageInput" class="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-apple-blue dark:hover:border-blue-400 hover:bg-apple-blue/5 dark:hover:bg-blue-400/10 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-sm text-gray-600 dark:text-gray-300">点击上传背景图片</span>
+                        </label>
+                    </div>
+                    <button id="removeBgImage" class="mt-2 text-xs text-gray-500 hover:text-red-500 transition-colors hidden">移除图片背景</button>
+                </div>
+                
+                <!-- 背景模糊与遮罩 -->
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 block">背景效果</label>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600 dark:text-gray-300">背景模糊</span>
+                            <input type="range" id="bgBlurSlider" min="0" max="20" value="0" class="w-32 accent-apple-blue">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600 dark:text-gray-300">遮罩亮度</span>
+                            <input type="range" id="bgOverlaySlider" min="0" max="80" value="0" class="w-32 accent-apple-blue">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div id="pasteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
-            <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-800 dark:text-white">粘贴文本</h3><button id="closePasteModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">✕</button></div>
-            <textarea id="pasteTextArea" class="w-full h-40 p-4 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl resize-none input-focus-ring" placeholder="在此粘贴文本内容..."></textarea>
-            <div class="text-xs text-gray-400 mt-2">支持智能识别：目标、重点、待办、习惯、时间安排等关键词</div>
-            <div class="flex gap-3 mt-4">
-                <button id="cancelPasteBtn" class="flex-1 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-dark-border rounded-lg hover:bg-gray-200 dark:hover:bg-dark-card transition-colors">取消</button>
-                <button id="confirmPasteBtn" class="flex-1 py-2 text-sm text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">确认导入</button>
+    <!-- 计划管理弹窗 -->
+    <div id="planModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass rounded-apple-xl p-6 w-full max-w-lg mx-4 shadow-apple-lg transform scale-95 transition-transform duration-300" id="planModalContent">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg font-semibold tracking-tight">计划管理</h3>
+                <button id="closePlanModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 新建计划 -->
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="newPlanNameInput" class="flex-1 px-3.5 py-2.5 text-sm bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl input-apple" placeholder="输入新计划名称...">
+                <button id="createPlanBtn" class="btn-apple px-4 py-2.5 text-sm font-medium text-white bg-apple-blue hover:bg-blue-600 rounded-xl transition-colors whitespace-nowrap">新建计划</button>
+            </div>
+
+            <!-- 导入/导出 -->
+            <div class="flex gap-2 mb-5">
+                <button id="importPlanFileBtn" class="btn-apple flex-1 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 rounded-xl transition-colors border border-white/50 dark:border-white/10 flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    导入JSON文件
+                </button>
+                <button id="exportCurrentPlanBtn" class="btn-apple flex-1 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 rounded-xl transition-colors border border-white/50 dark:border-white/10 flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    导出当前计划
+                </button>
+                <input type="file" id="importPlanFileInput" accept=".json" class="hidden">
+            </div>
+
+            <!-- 计划列表 -->
+            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">我的计划</div>
+            <div id="planList" class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                <!-- 动态填充 -->
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-200/50 dark:border-white/10">
+                <p class="text-xs text-gray-400 dark:text-gray-500 flex items-start gap-1.5">
+                    <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    导出JSON文件可永久保存到电脑，不受浏览器清理影响。建议定期导出备份。
+                </p>
             </div>
         </div>
     </div>
 
     <script>
-        const templates = {
-            'optimal-summer': {
-                stageGoal: "暑假实现学科查漏补缺，每日学习6小时，每周运动3次，完成2本课外书阅读，每日复盘总结",
-                flags: ["完成当日学习计划", "运动30分钟以上", "睡前复盘当日得失"],
-                todos: ["整理当日错题本", "背诵20个英语单词", "阅读课外书30分钟"],
-                schedule: [
-                    { time: "07:00", content: "晨起+早餐+复盘昨日" },
-                    { time: "08:00", content: "主科薄弱点专项学习" },
-                    { time: "10:15", content: "副科知识点梳理+练习" },
-                    { time: "12:00", content: "午餐+午休" },
-                    { time: "14:30", content: "技能学习（编程/写作等）" },
-                    { time: "16:45", content: "运动/户外活动" },
-                    { time: "19:00", content: "课外书阅读+笔记" },
-                    { time: "20:45", content: "当日复盘+明日计划" }
-                ],
-                habits: ["早起", "每日学习", "运动", "阅读", "复盘"]
-            }
+        // 数据结构
+        const scheduleData = { mon: {}, tue: {}, wed: {}, thu: {}, fri: {}, sat: {}, sun: {} };
+        let saveTimeout = null;
+        let currentBgImage = null;
+        let currentPlanId = 'default';
+
+        // 背景预设映射
+        const bgPresets = {
+            default: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%)',
+            ocean: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            sunset: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            forest: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+            sky: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+            candy: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+            midnight: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            dark: '#000000',
+            light: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+            aurora: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)'
         };
 
-        let currentDay = 'mon';
-        let currentTemplate = null;
-        let historyStack = [];
-        let historyIndex = -1;
-        const MAX_HISTORY = 50;
-        let saveTimeout = null;
+        // ============ 计划管理 ============
+        function getPlanList() {
+            try {
+                return JSON.parse(localStorage.getItem('planList') || '[]');
+            } catch { return []; }
+        }
 
-        const scheduleData = { mon: {}, tue: {}, wed: {}, thu: {}, fri: {}, sat: {}, sun: {} };
+        function savePlanList(list) {
+            localStorage.setItem('planList', JSON.stringify(list));
+        }
 
-        function saveToHistory() {
-            const state = {
+        function ensureDefaultPlan() {
+            let list = getPlanList();
+            if (list.length === 0) {
+                list = [{ id: 'default', name: '暑假计划', createdAt: Date.now() }];
+                savePlanList(list);
+            }
+            return list;
+        }
+
+        function createPlan(name) {
+            const list = getPlanList();
+            const id = 'plan_' + Date.now();
+            list.push({ id, name, createdAt: Date.now() });
+            savePlanList(list);
+            return id;
+        }
+
+        function deletePlan(id) {
+            let list = getPlanList();
+            if (list.length <= 1) { showToast('至少保留一个计划'); return false; }
+            list = list.filter(p => p.id !== id);
+            savePlanList(list);
+            localStorage.removeItem('planData_' + id);
+            return true;
+        }
+
+        function renamePlan(id, newName) {
+            const list = getPlanList();
+            const plan = list.find(p => p.id === id);
+            if (plan) { plan.name = newName; savePlanList(list); }
+        }
+
+        function switchPlan(id) {
+            // 先保存当前计划
+            saveCurrentPlan();
+            currentPlanId = id;
+            localStorage.setItem('currentPlanId', id);
+            loadCurrentPlan();
+            updatePlanNameDisplay();
+        }
+
+        function getCurrentPlanName() {
+            const list = getPlanList();
+            const plan = list.find(p => p.id === currentPlanId);
+            return plan ? plan.name : '未命名计划';
+        }
+
+        function updatePlanNameDisplay() {
+            document.getElementById('currentPlanName').textContent = getCurrentPlanName();
+        }
+
+        // ============ 自动保存（按计划ID分别存储）============
+        function scheduleAutoSave() {
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-apple-yellow animate-pulse"></span> 保存中...';
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveCurrentPlan();
+                status.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-apple-green"></span> 已保存';
+            }, 800);
+        }
+
+        function gatherCurrentData() {
+            const data = {
                 stageGoal: document.getElementById('stageGoal').value,
-                achievements: document.getElementById('achievements').value,
-                nextWeek: document.getElementById('nextWeek').value,
-                flags: [], todos: [], habits: [],
+                flags: [],
+                todos: [],
                 scheduleData: JSON.parse(JSON.stringify(scheduleData)),
-                currentDay: currentDay,
-                currentTemplate: currentTemplate
+                background: getBackgroundSettings(),
+                savedAt: new Date().toISOString()
             };
             document.querySelectorAll('.flag-item').forEach(item => {
-                state.flags.push({
+                data.flags.push({
                     text: item.querySelector('input').value,
                     checked: item.querySelector('.check-btn').classList.contains('checked')
                 });
             });
             document.querySelectorAll('.todo-item').forEach(item => {
-                state.todos.push({
+                data.todos.push({
                     text: item.querySelector('input').value,
                     checked: item.querySelector('.check-btn').classList.contains('checked')
                 });
             });
-            document.querySelectorAll('.habit-item').forEach(item => {
-                const days = [];
-                item.querySelectorAll('.habit-check-btn').forEach(btn => {
-                    days.push(btn.classList.contains('bg-primary-500'));
-                });
-                state.habits.push({
-                    name: item.querySelector('input').value,
-                    days: days
-                });
-            });
-            historyStack = historyStack.slice(0, historyIndex + 1);
-            historyStack.push(state);
-            if (historyStack.length > MAX_HISTORY) {
-                historyStack.shift();
+            return data;
+        }
+
+        function saveCurrentPlan() {
+            const data = gatherCurrentData();
+            localStorage.setItem('planData_' + currentPlanId, JSON.stringify(data));
+        }
+
+        function loadCurrentPlan() {
+            const saved = localStorage.getItem('planData_' + currentPlanId);
+            // 先清空 scheduleData
+            Object.keys(scheduleData).forEach(day => scheduleData[day] = {});
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    applyData(data);
+                    if (data.background) applyBackgroundSettings(data.background);
+                } catch (e) {
+                    console.error('加载失败:', e);
+                }
             } else {
-                historyIndex++;
+                // 新计划，重置UI
+                document.getElementById('stageGoal').value = '';
+                const flagsContainer = document.getElementById('flagsContainer');
+                const flagsAddBtn = document.getElementById('addFlagBtn');
+                flagsContainer.innerHTML = '';
+                for (let i = 0; i < 3; i++) flagsContainer.appendChild(createFlagItem('', false));
+                flagsContainer.appendChild(flagsAddBtn);
+                const todosContainer = document.getElementById('todosContainer');
+                const todosAddBtn = document.getElementById('addTodoBtn');
+                todosContainer.innerHTML = '';
+                for (let i = 0; i < 3; i++) todosContainer.appendChild(createTodoItem('', false));
+                todosContainer.appendChild(todosAddBtn);
+                renderSchedule();
             }
-            updateUndoButton();
-            scheduleAutoSave();
         }
 
-        function undo() {
-            if (historyIndex > 0) {
-                historyIndex--;
-                restoreFromHistory(historyStack[historyIndex]);
-                showToast('已撤销');
+        // ============ 导出/导入 JSON 文件 ============
+        function exportPlanAsFile(planId, planName) {
+            let data;
+            if (planId === currentPlanId) {
+                data = gatherCurrentData();
+            } else {
+                const saved = localStorage.getItem('planData_' + planId);
+                data = saved ? JSON.parse(saved) : {};
             }
+            const exportData = {
+                _format: 'summer-plan-v1',
+                _exportedAt: new Date().toISOString(),
+                planName: planName,
+                ...data
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (planName || '计划') + '_' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('已导出 ' + planName);
         }
 
-        function restoreFromHistory(state) {
-            document.getElementById('stageGoal').value = state.stageGoal;
-            document.getElementById('achievements').value = state.achievements;
-            document.getElementById('nextWeek').value = state.nextWeek;
+        function importPlanFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const planName = data.planName || file.name.replace('.json', '');
+                    // 创建新计划
+                    const newId = createPlan(planName);
+                    // 存储数据
+                    const cleanData = { ...data };
+                    delete cleanData._format;
+                    delete cleanData._exportedAt;
+                    delete cleanData.planName;
+                    localStorage.setItem('planData_' + newId, JSON.stringify(cleanData));
+                    renderPlanList();
+                    showToast('已导入计划：' + planName);
+                    // 自动切换到导入的计划
+                    switchPlan(newId);
+                    closePlanModalFn();
+                } catch (err) {
+                    showToast('导入失败：文件格式不正确');
+                }
+            };
+            reader.readAsText(file);
+        }
 
-            const flagsContainer = document.getElementById('flagsContainer');
-            const flagsAddBtn = document.getElementById('addFlagBtn');
-            flagsContainer.innerHTML = '';
-            state.flags.forEach(flag => {
-                const div = document.createElement('div');
-                div.className = 'flex items-start gap-3 flag-item';
-                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (flag.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (flag.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + flag.text + '" placeholder="输入重点目标...">';
-                flagsContainer.appendChild(div);
-                initCheckBtn(div.querySelector('.check-btn'));
-                div.querySelector('input').addEventListener('input', updatePreview);
-            });
-            flagsContainer.appendChild(flagsAddBtn);
+        function loadFromStorage() {
+            // 迁移旧数据
+            const oldData = localStorage.getItem('simplePlanData');
+            if (oldData && !localStorage.getItem('planData_default')) {
+                localStorage.setItem('planData_default', oldData);
+                localStorage.removeItem('simplePlanData');
+            }
+            ensureDefaultPlan();
+            // 恢复当前计划ID
+            currentPlanId = localStorage.getItem('currentPlanId') || 'default';
+            // 如果当前ID不存在于列表中，回退到第一个
+            const list = getPlanList();
+            if (!list.find(p => p.id === currentPlanId)) {
+                currentPlanId = list[0].id;
+            }
+            loadCurrentPlan();
+            updatePlanNameDisplay();
+        }
 
-            const todosContainer = document.getElementById('todosContainer');
-            const todosAddBtn = document.getElementById('addTodoBtn');
-            todosContainer.innerHTML = '';
-            state.todos.forEach(todo => {
-                const div = document.createElement('div');
-                div.className = 'flex items-start gap-3 todo-item';
-                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (todo.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (todo.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + todo.text + '" placeholder="输入待办事项...">';
-                todosContainer.appendChild(div);
-                initCheckBtn(div.querySelector('.check-btn'));
-            });
-            todosContainer.appendChild(todosAddBtn);
+        // ============ 背景设置 ============
+        function getBackgroundSettings() {
+            const bgLayer = document.getElementById('bgLayer');
+            return {
+                type: bgLayer.dataset.type || 'default',
+                value: bgLayer.dataset.value || 'default',
+                image: currentBgImage,
+                blur: document.getElementById('bgBlurSlider').value,
+                overlay: document.getElementById('bgOverlaySlider').value
+            };
+        }
 
-            const habitsContainer = document.getElementById('habitsContainer');
-            const habitsAddBtn = document.getElementById('addHabitBtn');
-            habitsContainer.innerHTML = '';
-            state.habits.forEach(habit => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between habit-item';
-                let daysHtml = '';
-                const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
-                habit.days.forEach((checked, idx) => {
-                    daysHtml += '<button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors ' + (checked ? 'bg-primary-500 text-white' : '') + '">' + dayNames[idx] + '</button>';
-                });
-                div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + habit.name + '" placeholder="习惯名称..."><div class="flex gap-1 ml-3">' + daysHtml + '</div>';
-                habitsContainer.appendChild(div);
-                div.querySelectorAll('.habit-check-btn').forEach(btn => {
-                    btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
-                });
-            });
-            habitsContainer.appendChild(habitsAddBtn);
+        function applyBackgroundSettings(settings) {
+            const bgLayer = document.getElementById('bgLayer');
+            const { type, value, image, blur, overlay } = settings;
 
-            Object.keys(scheduleData).forEach(day => {
-                scheduleData[day] = JSON.parse(JSON.stringify(state.scheduleData[day]));
-            });
-            currentDay = state.currentDay;
-            currentTemplate = state.currentTemplate;
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if (btn.dataset.day === currentDay) {
-                    btn.classList.add('tab-active');
-                    btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+            if (type === 'preset') {
+                bgLayer.style.backgroundImage = bgPresets[value] || bgPresets.default;
+                if (value === 'dark' || value === 'midnight') {
+                    document.documentElement.classList.add('dark');
                 } else {
-                    btn.classList.remove('tab-active');
-                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
+                    document.documentElement.classList.remove('dark');
                 }
+            } else if (type === 'color') {
+                bgLayer.style.backgroundImage = 'none';
+                bgLayer.style.backgroundColor = value;
+            } else if (type === 'image' && image) {
+                bgLayer.style.backgroundImage = `url(${image})`;
+            }
+
+            bgLayer.dataset.type = type;
+            bgLayer.dataset.value = value;
+            if (image) currentBgImage = image;
+
+            if (blur !== undefined) document.getElementById('bgBlurSlider').value = blur;
+            if (overlay !== undefined) document.getElementById('bgOverlaySlider').value = overlay;
+            updateBgEffects();
+
+            // 更新选中状态
+            document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('active'));
+            if (type === 'preset') {
+                const active = document.querySelector(`[data-bg="${value}"]`);
+                if (active) active.classList.add('active');
+            }
+
+            const removeBtn = document.getElementById('removeBgImage');
+            if (type === 'image') removeBtn.classList.remove('hidden');
+            else removeBtn.classList.add('hidden');
+        }
+
+        function updateBgEffects() {
+            const bgLayer = document.getElementById('bgLayer');
+            const blur = document.getElementById('bgBlurSlider').value;
+            const overlay = document.getElementById('bgOverlaySlider').value;
+            bgLayer.style.filter = `blur(${blur}px)`;
+            bgLayer.style.transform = `scale(${1 + blur * 0.01})`;
+            document.documentElement.style.setProperty('--bg-overlay', `rgba(255,255,255,${overlay / 100})`);
+        }
+
+        function initBackgroundEvents() {
+            const bgModal = document.getElementById('bgModal');
+            const bgModalContent = document.getElementById('bgModalContent');
+
+            document.getElementById('bgSettingsBtn').addEventListener('click', () => {
+                bgModal.classList.remove('opacity-0', 'pointer-events-none');
+                bgModalContent.classList.remove('scale-95');
+                bgModalContent.classList.add('scale-100');
             });
 
-            renderSchedule();
-            updateProgress();
-            updatePreview();
-        }
+            function closeBgModal() {
+                bgModal.classList.add('opacity-0', 'pointer-events-none');
+                bgModalContent.classList.remove('scale-100');
+                bgModalContent.classList.add('scale-95');
+            }
 
-        function updateUndoButton() {
-            document.getElementById('undoBtn').disabled = historyIndex <= 0;
-        }
+            document.getElementById('closeBgModal').addEventListener('click', closeBgModal);
+            bgModal.addEventListener('click', (e) => { if (e.target === bgModal) closeBgModal(); });
 
-        function initSchedule(scheduleItems) {
-            saveToHistory();
-            Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
-            scheduleItems.forEach(item => {
-                const time = typeof item === 'string' ? item : item.time;
-                const content = typeof item === 'string' ? '' : (item.content || '');
-                Object.keys(scheduleData).forEach(day => {
-                    scheduleData[day][time] = content;
+            // 预设背景
+            document.querySelectorAll('.bg-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const bg = option.dataset.bg;
+                    applyBackgroundSettings({ type: 'preset', value: bg, blur: 0, overlay: 0 });
+                    scheduleAutoSave();
+                    showToast('背景已切换');
                 });
             });
-            renderSchedule();
+
+            // 自定义颜色
+            const colorPicker = document.getElementById('bgColorPicker');
+            const colorText = document.getElementById('bgColorText');
+            colorPicker.addEventListener('input', () => colorText.value = colorPicker.value);
+            document.getElementById('applyBgColor').addEventListener('click', () => {
+                const color = colorText.value || colorPicker.value;
+                applyBackgroundSettings({ type: 'color', value: color, blur: 0, overlay: 0 });
+                scheduleAutoSave();
+                showToast('背景颜色已应用');
+            });
+
+            // 上传图片
+            document.getElementById('bgImageInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    applyBackgroundSettings({ type: 'image', value: 'custom', image: event.target.result, blur: 0, overlay: 20 });
+                    scheduleAutoSave();
+                    showToast('背景图片已应用');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 移除图片
+            document.getElementById('removeBgImage').addEventListener('click', () => {
+                applyBackgroundSettings({ type: 'preset', value: 'default', blur: 0, overlay: 0 });
+                scheduleAutoSave();
+                showToast('已恢复默认背景');
+            });
+
+            // 滑块
+            document.getElementById('bgBlurSlider').addEventListener('input', () => {
+                updateBgEffects();
+                scheduleAutoSave();
+            });
+            document.getElementById('bgOverlaySlider').addEventListener('input', () => {
+                updateBgEffects();
+                scheduleAutoSave();
+            });
         }
 
-        function renderSchedule() {
-            const tbody = document.getElementById('scheduleBody');
-            tbody.innerHTML = '';
-            const times = Object.keys(scheduleData[currentDay]).sort();
-            times.forEach(time => {
-                const row = document.createElement('tr');
-                row.className = 'border-b border-gray-100 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card/50 transition-colors';
-                row.innerHTML = '<td class="py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">' + time + '</td><td class="py-3 px-4"><input type="text" class="schedule-input w-full text-gray-700 dark:text-gray-300 bg-transparent border-b border-gray-200 dark:border-dark-border focus:border-primary-400 dark:focus:border-primary-400 rounded-none px-0 py-1 text-sm input-focus-ring" placeholder="输入安排..." value="' + (scheduleData[currentDay][time] || '') + '" data-time="' + time + '"></td>';
-                tbody.appendChild(row);
-            });
-            document.querySelectorAll('.schedule-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    saveToHistory();
-                    scheduleData[currentDay][this.dataset.time] = this.value;
-                });
-            });
-        }
-
-        function loadTemplate(templateId) {
-            saveToHistory();
-            currentTemplate = templateId;
-            const template = templates[templateId];
-            
-            document.getElementById('stageGoal').value = template.stageGoal || '';
-            document.getElementById('achievements').value = '';
-            document.getElementById('nextWeek').value = '';
+        // ============ 应用数据 ============
+        function applyData(data) {
+            document.getElementById('stageGoal').value = data.stageGoal || '';
 
             const flagsContainer = document.getElementById('flagsContainer');
             const flagsAddBtn = document.getElementById('addFlagBtn');
             flagsContainer.innerHTML = '';
-            (template.flags || []).forEach(flagText => {
-                const div = document.createElement('div');
-                div.className = 'flex items-start gap-3 flag-item';
-                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + flagText + '" placeholder="输入重点目标...">';
-                flagsContainer.appendChild(div);
-                initCheckBtn(div.querySelector('.check-btn'));
-                div.querySelector('input').addEventListener('input', updatePreview);
-            });
+            if (data.flags && data.flags.length > 0) {
+                data.flags.forEach(flag => {
+                    flagsContainer.appendChild(createFlagItem(flag.text, flag.checked));
+                });
+            } else {
+                for (let i = 0; i < 3; i++) flagsContainer.appendChild(createFlagItem('', false));
+            }
             flagsContainer.appendChild(flagsAddBtn);
 
             const todosContainer = document.getElementById('todosContainer');
             const todosAddBtn = document.getElementById('addTodoBtn');
             todosContainer.innerHTML = '';
-            (template.todos || []).forEach(todoText => {
-                const div = document.createElement('div');
-                div.className = 'flex items-start gap-3 todo-item';
-                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + todoText + '" placeholder="输入待办事项...">';
-                todosContainer.appendChild(div);
-                initCheckBtn(div.querySelector('.check-btn'));
-            });
+            if (data.todos && data.todos.length > 0) {
+                data.todos.forEach(todo => {
+                    todosContainer.appendChild(createTodoItem(todo.text, todo.checked));
+                });
+            } else {
+                for (let i = 0; i < 3; i++) todosContainer.appendChild(createTodoItem('', false));
+            }
             todosContainer.appendChild(todosAddBtn);
 
-            const habitsContainer = document.getElementById('habitsContainer');
-            const habitsAddBtn = document.getElementById('addHabitBtn');
-            habitsContainer.innerHTML = '';
-            (template.habits || []).forEach(habitName => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between habit-item';
-                div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + habitName + '" placeholder="习惯名称..."><div class="flex gap-1 ml-3"><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">一</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">二</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">三</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">四</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">五</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">六</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">日</button></div>';
-                habitsContainer.appendChild(div);
-                div.querySelectorAll('.habit-check-btn').forEach(btn => {
-                    btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
+            if (data.scheduleData) {
+                Object.keys(scheduleData).forEach(day => {
+                    scheduleData[day] = JSON.parse(JSON.stringify(data.scheduleData[day] || {}));
                 });
-            });
-            habitsContainer.appendChild(habitsAddBtn);
-
-            Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
-            initSchedule(template.schedule || []);
-            
-            updateProgress();
-            updatePreview();
-            showToast('已加载「高效暑假模板」');
-        }
-
-        function getTemplateName(templateId) {
-            const names = { 'optimal-summer': '高效暑假模板' };
-            return names[templateId] || templateId;
-        }
-
-        function updateProgress() {
-            const flags = document.querySelectorAll('.flag-item');
-            const completedFlags = document.querySelectorAll('.flag-item .check-btn.checked').length;
-            document.getElementById('flagsProgress').textContent = completedFlags + '/' + flags.length;
-            document.getElementById('flagsBar').style.width = (flags.length > 0 ? (completedFlags / flags.length * 100) : 0) + '%';
-
-            const todos = document.querySelectorAll('.todo-item');
-            const completedTodos = document.querySelectorAll('.todo-item .check-btn.checked').length;
-            document.getElementById('todosProgress').textContent = completedTodos + '/' + todos.length;
-            document.getElementById('todosBar').style.width = (todos.length > 0 ? (completedTodos / todos.length * 100) : 0) + '%';
-
-            const habits = document.querySelectorAll('.habit-item');
-            let totalHabitChecks = 0, completedHabitChecks = 0;
-            habits.forEach(item => {
-                const checks = item.querySelectorAll('.habit-check-btn');
-                totalHabitChecks += checks.length;
-                completedHabitChecks += item.querySelectorAll('.habit-check-btn.bg-primary-500').length;
-            });
-            const habitsPercent = totalHabitChecks > 0 ? Math.round((completedHabitChecks / totalHabitChecks) * 100) : 0;
-            document.getElementById('habitsProgress').textContent = habitsPercent + '%';
-            document.getElementById('habitsBar').style.width = habitsPercent + '%';
-        }
-
-        function updatePreview() {
-            const flagsList = document.getElementById('previewFlags');
-            const flagInputs = document.querySelectorAll('.flag-item input');
-            flagsList.innerHTML = '';
-            flagInputs.forEach(input => {
-                const value = input.value.trim();
-                if (value) {
-                    const li = document.createElement('li');
-                    li.className = 'flex items-center gap-2';
-                    li.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary-500"></span> ' + value;
-                    flagsList.appendChild(li);
-                }
-            });
-            if (flagsList.children.length === 0) {
-                flagsList.innerHTML = '<li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span> 点击左侧添加</li>';
             }
-            const goal = document.getElementById('stageGoal').value.trim();
-            document.getElementById('previewGoal').textContent = goal || '点击左侧添加目标';
+            renderSchedule();
         }
 
-        function addFlag() {
-            saveToHistory();
-            const container = document.getElementById('flagsContainer');
+        // ============ 创建列表项 ============
+        function createFlagItem(text, checked) {
             const div = document.createElement('div');
             div.className = 'flex items-start gap-3 flag-item fade-in';
-            div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入重点目标...">';
-            container.insertBefore(div, document.getElementById('addFlagBtn'));
+            div.innerHTML = `
+                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0 ${checked ? 'checked' : ''}">
+                    <svg class="w-3 h-3 text-white transition-opacity ${checked ? '' : 'opacity-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </button>
+                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" value="${text || ''}" placeholder="输入重点目标...">
+            `;
             initCheckBtn(div.querySelector('.check-btn'));
-            div.querySelector('input').addEventListener('input', updatePreview);
-            div.querySelector('input').focus();
+            div.querySelector('input').addEventListener('input', scheduleAutoSave);
+            return div;
         }
 
-        function addTodo() {
-            saveToHistory();
-            const container = document.getElementById('todosContainer');
+        function createTodoItem(text, checked) {
             const div = document.createElement('div');
             div.className = 'flex items-start gap-3 todo-item fade-in';
-            div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle"><svg class="w-3 h-3 text-white opacity-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="输入待办事项...">';
-            container.insertBefore(div, document.getElementById('addTodoBtn'));
+            div.innerHTML = `
+                <button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle flex-shrink-0 ${checked ? 'checked' : ''}">
+                    <svg class="w-3 h-3 text-white transition-opacity ${checked ? '' : 'opacity-0'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </button>
+                <input type="text" class="flex-1 text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-xl px-3.5 py-2 text-sm input-apple" value="${text || ''}" placeholder="输入待办事项...">
+            `;
             initCheckBtn(div.querySelector('.check-btn'));
-            div.querySelector('input').focus();
-        }
-
-        function addHabit() {
-            saveToHistory();
-            const container = document.getElementById('habitsContainer');
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between habit-item fade-in';
-            div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" placeholder="习惯名称..."><div class="flex gap-1 ml-3"><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">一</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">二</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">三</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">四</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">五</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">六</button><button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors">日</button></div>';
-            container.appendChild(div);
-            div.querySelectorAll('.habit-check-btn').forEach(btn => {
-                btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
-            });
-            div.querySelector('input').focus();
-        }
-
-        function addTimeSlot() {
-            saveToHistory();
-            const tbody = document.getElementById('scheduleBody');
-            const row = document.createElement('tr');
-            row.className = 'border-b border-gray-100 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-card/50 transition-colors fade-in';
-            row.innerHTML = '<td class="py-3 px-4"><input type="text" class="w-20 text-gray-700 dark:text-gray-300 bg-transparent border-b border-gray-200 dark:border-dark-border focus:border-primary-400 dark:focus:border-primary-400 rounded-none px-0 py-1 text-sm font-medium text-gray-500 dark:text-gray-400 input-focus-ring" placeholder="时间" data-time-input></td><td class="py-3 px-4"><input type="text" class="schedule-input w-full text-gray-700 dark:text-gray-300 bg-transparent border-b border-gray-200 dark:border-dark-border focus:border-primary-400 dark:focus:border-primary-400 rounded-none px-0 py-1 text-sm input-focus-ring" placeholder="输入安排..." data-time-new></td>';
-            tbody.appendChild(row);
-            const timeInput = row.querySelector('[data-time-input]');
-            const scheduleInput = row.querySelector('[data-time-new]');
-            timeInput.addEventListener('change', function() {
-                const time = this.value;
-                if (time) {
-                    this.setAttribute('data-time', time);
-                    scheduleInput.setAttribute('data-time', time);
-                    Object.keys(scheduleData).forEach(day => {
-                        if (!scheduleData[day][time]) {
-                            scheduleData[day][time] = '';
-                        }
-                    });
-                    scheduleInput.value = scheduleData[currentDay][time];
-                }
-            });
-            scheduleInput.addEventListener('input', function() {
-                const time = this.dataset.time;
-                if (time) {
-                    scheduleData[currentDay][time] = this.value;
-                }
-            });
-            timeInput.focus();
+            div.querySelector('input').addEventListener('input', scheduleAutoSave);
+            return div;
         }
 
         function initCheckBtn(btn) {
             btn.addEventListener('click', function() {
-                saveToHistory();
                 this.classList.toggle('checked');
                 this.querySelector('svg').classList.toggle('opacity-0');
-                updateProgress();
+                scheduleAutoSave();
             });
         }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-            }, 2000);
+        // ============ 添加按钮 ============
+        function addFlag() {
+            const container = document.getElementById('flagsContainer');
+            const item = createFlagItem('', false);
+            container.insertBefore(item, document.getElementById('addFlagBtn'));
+            item.querySelector('input').focus();
+            scheduleAutoSave();
         }
 
-        function exportExcel() {
-            const wb = XLSX.utils.book_new();
-            const stageGoal = document.getElementById('stageGoal').value;
-            const achievements = document.getElementById('achievements').value;
-            const nextWeek = document.getElementById('nextWeek').value;
-            const flags = [];
-            document.querySelectorAll('.flag-item').forEach(item => {
-                flags.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
-            });
-            const todos = [];
-            document.querySelectorAll('.todo-item').forEach(item => {
-                todos.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
-            });
-            const habits = [];
-            document.querySelectorAll('.habit-item').forEach(item => {
-                const days = [];
-                item.querySelectorAll('.habit-check-btn').forEach((btn, idx) => {
-                    days.push(btn.classList.contains('bg-primary-500') ? '✅' : '❌');
-                });
-                habits.push({ name: item.querySelector('input').value, days: days });
-            });
+        function addTodo() {
+            const container = document.getElementById('todosContainer');
+            const item = createTodoItem('', false);
+            container.insertBefore(item, document.getElementById('addTodoBtn'));
+            item.querySelector('input').focus();
+            scheduleAutoSave();
+        }
 
-            const headerStyle = { fill: { fgColor: { rgb: '4A90A4' } }, font: { color: { rgb: 'FFFFFF' }, bold: true, size: 12 }, alignment: { horizontal: 'center', vertical: 'center' } };
-            const titleStyle = { fill: { fgColor: { rgb: '2563EB' } }, font: { color: { rgb: 'FFFFFF' }, bold: true, size: 14 }, alignment: { horizontal: 'center', vertical: 'center' } };
-            const sectionStyle = { fill: { fgColor: { rgb: 'E0F2FE' } }, font: { color: { rgb: '0369A1' }, bold: true, size: 11 }, alignment: { horizontal: 'center', vertical: 'center' } };
-
-            function addSheet(name, data, colWidths, merges) {
-                const ws = XLSX.utils.aoa_to_sheet(data);
-                if (merges) ws['!merge'] = merges;
-                if (colWidths) ws['!cols'] = colWidths;
-                const titleRow = data.findIndex(row => row[0] && row[0].includes('📌') || row[0] && row[0].includes('�') || row[0] && row[0].includes('📋') || row[0] && row[0].includes('⏰') || row[0] && row[0].includes('🌱') || row[0] && row[0].includes('📝'));
-                if (titleRow !== -1) {
-                    for (let i = 0; i < data[titleRow].length; i++) {
-                        const cell = XLSX.utils.encode_cell({ r: titleRow, c: i });
-                        if (!ws[cell]) ws[cell] = {};
-                        Object.assign(ws[cell], titleStyle);
-                    }
-                }
-                const headerRow = data.findIndex(row => row[0] === '序号' || row[0] === '时间' || row[0] === '习惯名称');
-                if (headerRow !== -1) {
-                    for (let i = 0; i < data[headerRow].length; i++) {
-                        const cell = XLSX.utils.encode_cell({ r: headerRow, c: i });
-                        if (!ws[cell]) ws[cell] = {};
-                        Object.assign(ws[cell], headerStyle);
-                    }
-                }
-                XLSX.utils.book_append_sheet(wb, ws, name);
-            }
-
-            const goalSheet = [];
-            goalSheet.push(['📌 阶段目标', '']);
-            goalSheet.push(['', '']);
-            goalSheet.push(['目标内容', stageGoal || '未填写']);
-            goalSheet.push(['', '']);
-            goalSheet.push(['创建时间', new Date().toLocaleString('zh-CN')]);
-            goalSheet.push(['模板类型', currentTemplate ? getTemplateName(currentTemplate) : '自定义']);
-            addSheet('阶段目标', goalSheet, [{ wch: 15 }, { wch: 60 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }]);
-
-            const flagSheet = [];
-            flagSheet.push(['🚩 本周重点', '', '', '']);
-            flagSheet.push(['', '', '', '']);
-            flagSheet.push(['序号', '重点内容', '状态', '备注']);
-            flags.forEach((f, idx) => {
-                flagSheet.push([idx + 1, f.text || '未填写', f.checked ? '已完成' : '未完成', '']);
-            });
-            if (flags.length === 0) {
-                flagSheet.push([1, '未填写', '未完成', '']);
-            }
-            addSheet('本周重点', flagSheet, [{ wch: 8 }, { wch: 45 }, { wch: 12 }, { wch: 20 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }]);
-
-            const todoSheet = [];
-            todoSheet.push(['📋 待办清单', '', '', '']);
-            todoSheet.push(['', '', '', '']);
-            todoSheet.push(['序号', '待办事项', '状态', '备注']);
-            todos.forEach((t, idx) => {
-                todoSheet.push([idx + 1, t.text || '未填写', t.checked ? '已完成' : '未完成', '']);
-            });
-            if (todos.length === 0) {
-                todoSheet.push([1, '未填写', '未完成', '']);
-            }
-            addSheet('待办清单', todoSheet, [{ wch: 8 }, { wch: 45 }, { wch: 12 }, { wch: 20 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }]);
-
-            const scheduleSheet = [];
-            scheduleSheet.push(['⏰ 每日时间轴', '', '', '', '', '', '', '']);
-            scheduleSheet.push(['', '', '', '', '', '', '', '']);
-            scheduleSheet.push(['时间', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
+        // ============ 时间轴 ============
+        function renderSchedule() {
+            const tbody = document.getElementById('scheduleBody');
+            tbody.innerHTML = '';
             const allTimes = new Set();
-            Object.values(scheduleData).forEach(dayData => { Object.keys(dayData).forEach(time => allTimes.add(time)); });
-            const sortedTimes = Array.from(allTimes).sort();
-            if (sortedTimes.length === 0) {
-                scheduleSheet.push(['暂无时间段', '未填写', '未填写', '未填写', '未填写', '未填写', '未填写', '未填写']);
-            } else {
-                sortedTimes.forEach(time => {
-                    const row = [time];
-                    ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
-                        row.push(scheduleData[day][time] || '未填写');
-                    });
-                    scheduleSheet.push(row);
+            Object.values(scheduleData).forEach(dayData => Object.keys(dayData).forEach(time => allTimes.add(time)));
+            const times = Array.from(allTimes).sort();
+            if (times.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-gray-400 dark:text-gray-500 text-sm">
+                    <div class="flex flex-col items-center gap-2">
+                        <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>点击「添加时间段」开始规划</span>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+            times.forEach(time => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100/50 dark:border-white/5 last:border-0';
+                let cells = `<td class="py-2.5 px-3 whitespace-nowrap bg-white/30 dark:bg-black/10 border-r border-gray-100/50 dark:border-white/5 flex items-center justify-between">
+                    <input type="text" class="time-edit-input w-20 text-sm font-semibold text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-black/30 border border-white/60 dark:border-white/10 focus:border-apple-blue/50 rounded-lg px-2 py-1.5 input-apple" value="${time}" data-original-time="${time}">
+                    <button class="delete-time-btn p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors" data-time="${time}" title="删除此时间段">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </td>`;
+                ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                    cells += `<td class="py-2 px-2">
+                        <input type="text" class="schedule-input w-full text-gray-700 dark:text-gray-200 bg-white/60 dark:bg-black/30 border border-white/60 dark:border-white/10 focus:border-apple-blue/50 rounded-lg px-2 py-1.5 text-sm input-apple" placeholder="安排..." value="${scheduleData[day][time] || ''}" data-day="${day}" data-time="${time}">
+                    </td>`;
                 });
+                row.innerHTML = cells;
+                tbody.appendChild(row);
+            });
+        }
+
+        function addTimeSlot() {
+            const tbody = document.getElementById('scheduleBody');
+            const existingNewRow = tbody.querySelector('.new-time-row');
+            if (existingNewRow) {
+                existingNewRow.querySelector('.new-time-input').focus();
+                return;
             }
-            addSheet('每日时间轴', scheduleSheet, [{ wch: 12 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }]);
-
-            const habitsSheet = [];
-            habitsSheet.push(['🌱 习惯打卡', '', '', '', '', '', '', '']);
-            habitsSheet.push(['', '', '', '', '', '', '', '']);
-            habitsSheet.push(['习惯名称', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
-            habits.forEach(h => {
-                habitsSheet.push([h.name || '未命名', ...h.days]);
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-100/50 dark:border-white/5 bg-apple-blue/5 dark:bg-blue-500/10 new-time-row fade-in';
+            let cells = `<td class="py-2.5 px-3 border-r border-gray-100/50 dark:border-white/5">
+                <input type="text" class="new-time-input w-full text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white/70 dark:bg-black/40 border border-apple-blue/30 focus:border-apple-blue rounded-lg px-2 py-1.5 input-apple" placeholder="如 08:00">
+            </td>`;
+            ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                cells += `<td class="py-2 px-2"><input type="text" class="w-full text-gray-400 dark:text-gray-500 bg-white/30 dark:bg-black/10 border border-white/40 dark:border-white/5 rounded-lg px-2 py-1.5 text-sm" placeholder="先输时间" disabled></td>`;
             });
-            if (habits.length === 0) {
-                habitsSheet.push(['未填写', '❌', '❌', '❌', '❌', '❌', '❌', '❌']);
-            }
-            habitsSheet.push(['', '', '', '', '', '', '', '']);
-            let habitCompleted = 0, habitTotal = 0;
-            habits.forEach(h => { h.days.forEach(d => { habitTotal++; if (d === '✅') habitCompleted++; }); });
-            const habitRate = habitTotal > 0 ? Math.round((habitCompleted / habitTotal) * 100) : 0;
-            habitsSheet.push(['完成统计', '', '', '', '', '', '', '']);
-            habitsSheet.push(['习惯总数', habits.length, '', '', '', '', '', '']);
-            habitsSheet.push(['打卡次数', habitCompleted + '/' + habitTotal, '', '', '', '', '', '']);
-            habitsSheet.push(['完成率', habitRate + '%', '', '', '', '', '', '']);
-            addSheet('习惯打卡', habitsSheet, [{ wch: 18 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, { s: { r: habitsSheet.length - 4, c: 0 }, e: { r: habitsSheet.length - 4, c: 7 } }]);
-
-            const reflectionSheet = [];
-            reflectionSheet.push(['📝 周复盘', '', '']);
-            reflectionSheet.push(['', '', '']);
-            reflectionSheet.push(['本周成就', achievements || '未填写', '']);
-            reflectionSheet.push(['', '', '']);
-            reflectionSheet.push(['下周计划', nextWeek || '未填写', '']);
-            reflectionSheet.push(['', '', '']);
-            reflectionSheet.push(['💡 总结建议', '', '']);
-            const flagCompleted = flags.filter(f => f.checked).length;
-            if (flagCompleted === flags.length && flags.length > 0) reflectionSheet.push(['', '🎉 本周重点全部完成，继续保持！', '']);
-            else if (flagCompleted > 0) reflectionSheet.push(['', '👍 已完成部分重点，加油！', '']);
-            else reflectionSheet.push(['', '💪 开始制定你的计划吧！', '']);
-            addSheet('周复盘', reflectionSheet, [{ wch: 15 }, { wch: 55 }, { wch: 10 }], [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, { s: { r: 6, c: 0 }, e: { r: 6, c: 1 } }]);
-
-            const dateStr = new Date().toISOString().slice(0, 10);
-            const fileName = '暑假学习计划_' + dateStr + '.xlsx';
-            XLSX.writeFile(wb, fileName);
-            showToast('Excel导出成功！');
-        }
-
-        function exportJson() {
-            const data = {
-                version: '1.0',
-                created: new Date().toISOString(),
-                currentTemplate: currentTemplate,
-                stageGoal: document.getElementById('stageGoal').value,
-                achievements: document.getElementById('achievements').value,
-                nextWeek: document.getElementById('nextWeek').value,
-                flags: [],
-                todos: [],
-                habits: [],
-                scheduleData: JSON.parse(JSON.stringify(scheduleData))
-            };
-            document.querySelectorAll('.flag-item').forEach(item => {
-                data.flags.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
+            row.innerHTML = cells;
+            if (tbody.querySelector('tr:first-child td[colspan]')) tbody.innerHTML = '';
+            tbody.appendChild(row);
+            const input = row.querySelector('.new-time-input');
+            input.focus();
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') confirmNewTime(row, input.value.trim());
+                else if (e.key === 'Escape') cancelNewTime(row);
             });
-            document.querySelectorAll('.todo-item').forEach(item => {
-                data.todos.push({ text: item.querySelector('input').value, checked: item.querySelector('.check-btn').classList.contains('checked') });
-            });
-            document.querySelectorAll('.habit-item').forEach(item => {
-                const days = [];
-                item.querySelectorAll('.habit-check-btn').forEach(btn => {
-                    days.push(btn.classList.contains('bg-primary-500'));
-                });
-                data.habits.push({ name: item.querySelector('input').value, days: days });
-            });
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = '暑假学习计划_' + new Date().toISOString().slice(0, 10) + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('JSON导出成功！');
-        }
-
-        function scheduleAutoSave() {
-            const status = document.getElementById('saveStatus');
-            status.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> 保存中...';
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                localStorage.setItem('summerPlanData', JSON.stringify(historyStack[historyIndex]));
-                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> 已保存';
-            }, 1000);
-        }
-
-        function loadFromStorage() {
-            const saved = localStorage.getItem('summerPlanData');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    restoreFromHistory(data);
-                    showToast('已加载上次保存的数据');
-                } catch (e) {
-                    console.error('加载保存数据失败:', e);
-                }
-            }
-        }
-
-        function copyPlan() {
-            const stageGoal = document.getElementById('stageGoal').value;
-            const achievements = document.getElementById('achievements').value;
-            const nextWeek = document.getElementById('nextWeek').value;
-            let text = '📌 阶段目标\n' + (stageGoal || '未填写') + '\n\n';
-            text += '🚩 本周重点\n';
-            document.querySelectorAll('.flag-item').forEach(item => {
-                const checked = item.querySelector('.check-btn').classList.contains('checked');
-                text += (checked ? '✅' : '⬜') + ' ' + (item.querySelector('input').value || '未填写') + '\n';
-            });
-            text += '\n📋 待办清单\n';
-            document.querySelectorAll('.todo-item').forEach(item => {
-                const checked = item.querySelector('.check-btn').classList.contains('checked');
-                text += (checked ? '✅' : '⬜') + ' ' + (item.querySelector('input').value || '未填写') + '\n';
-            });
-            text += '\n🌱 习惯打卡\n';
-            document.querySelectorAll('.habit-item').forEach(item => {
-                const name = item.querySelector('input').value || '未命名';
-                const days = [];
-                item.querySelectorAll('.habit-check-btn').forEach((btn, idx) => {
-                    if (btn.classList.contains('bg-primary-500')) {
-                        days.push(['一', '二', '三', '四', '五', '六', '日'][idx]);
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (document.querySelector('.new-time-row') === row && input.value.trim()) {
+                        confirmNewTime(row, input.value.trim());
+                    } else if (!input.value.trim()) {
+                        cancelNewTime(row);
                     }
-                });
-                text += name + ': ' + (days.join(' ') || '(未打卡)') + '\n';
+                }, 150);
             });
-            text += '\n📝 周复盘\n本周成就: ' + (achievements || '未填写') + '\n下周计划: ' + (nextWeek || '未填写') + '\n';
-            navigator.clipboard.writeText(text).then(() => showToast('计划已复制到剪贴板')).catch(() => showToast('复制失败'));
         }
 
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            const btn = document.getElementById('themeBtn');
-            if (document.documentElement.classList.contains('dark')) {
-                btn.textContent = '☀️';
-                showToast('已切换到深色模式');
-            } else {
-                btn.textContent = '🌙';
-                showToast('已切换到浅色模式');
+        function confirmNewTime(row, timeStr) {
+            if (!timeStr) { cancelNewTime(row); return; }
+            const timePattern = /^\d{1,2}:\d{2}$/;
+            let formatted = timeStr;
+            if (/^\d{1,2}[点时]\d{0,2}$/.test(timeStr)) {
+                const parts = timeStr.split(/[点时]/);
+                formatted = `${parts[0].padStart(2, '0')}:${(parts[1] || '0').padStart(2, '0')}`;
             }
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
-
-        function loadTheme() {
-            const theme = localStorage.getItem('theme');
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.getElementById('themeBtn').textContent = '☀️';
+            if (!timePattern.test(formatted)) {
+                showToast('请输入正确的时间格式，如 08:00');
+                row.querySelector('.new-time-input').select();
+                return;
             }
-        }
-
-        function clearAll() {
-            if (!confirm('确定要清空所有内容吗？')) return;
-            saveToHistory();
-            document.getElementById('stageGoal').value = '';
-            document.querySelectorAll('.flag-item input').forEach(input => input.value = '');
-            document.querySelectorAll('.todo-item input').forEach(input => input.value = '');
-            document.getElementById('achievements').value = '';
-            document.getElementById('nextWeek').value = '';
-            document.querySelectorAll('.check-btn').forEach(btn => {
-                btn.classList.remove('checked');
-                btn.querySelector('svg').classList.add('opacity-0');
-            });
-            document.querySelectorAll('.habit-item').forEach(item => {
-                item.querySelector('input').value = '';
-                item.querySelectorAll('.habit-check-btn').forEach(btn => btn.classList.remove('bg-primary-500', 'text-white'));
-            });
-            Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
-            if (currentTemplate) {
-                loadTemplate(currentTemplate);
-            } else {
-                renderSchedule();
-                updateProgress();
-                updatePreview();
+            if (scheduleData.mon && scheduleData.mon[formatted]) {
+                showToast('该时间段已存在');
+                cancelNewTime(row);
+                return;
             }
-            showToast('已清空所有内容');
-        }
-
-        function loadSampleData() {
-            saveToHistory();
-            document.getElementById('stageGoal').value = '暑假完成Python学习，掌握数据分析基础，读完3本好书';
-            document.querySelectorAll('.flag-item input')[0].value = '完成Python基础语法学习';
-            document.querySelectorAll('.flag-item input')[1].value = '做一个数据分析项目';
-            document.querySelectorAll('.flag-item input')[2].value = '每天背50个英语单词';
-            document.querySelectorAll('.todo-item input')[0].value = '整理学习笔记';
-            document.querySelectorAll('.todo-item input')[1].value = '复习上周内容';
-            document.querySelectorAll('.todo-item input')[2].value = '写一篇学习总结';
-            document.getElementById('achievements').value = '完成了Python基础课程，做了一个简单的数据分析项目';
-            document.getElementById('nextWeek').value = '开始学习机器学习基础，继续背单词';
-            document.querySelectorAll('.habit-item input')[0].value = '早起';
-            document.querySelectorAll('.habit-item input')[1].value = '阅读';
-            document.querySelectorAll('.habit-item input')[2].value = '运动';
-            document.querySelectorAll('.habit-item')[0].querySelectorAll('.habit-check-btn')[0].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[0].querySelectorAll('.habit-check-btn')[1].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[0].querySelectorAll('.habit-check-btn')[2].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[1].querySelectorAll('.habit-check-btn')[0].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[1].querySelectorAll('.habit-check-btn')[2].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[1].querySelectorAll('.habit-check-btn')[4].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[2].querySelectorAll('.habit-check-btn')[1].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[2].querySelectorAll('.habit-check-btn')[3].classList.add('bg-primary-500', 'text-white');
-            document.querySelectorAll('.habit-item')[2].querySelectorAll('.habit-check-btn')[5].classList.add('bg-primary-500', 'text-white');
-            scheduleData['mon']['08:00'] = '晨读英语';
-            scheduleData['mon']['09:00'] = 'Python学习';
-            scheduleData['mon']['14:00'] = '数据分析';
-            scheduleData['tue']['08:00'] = '晨读英语';
-            scheduleData['tue']['09:00'] = 'Python学习';
-            scheduleData['tue']['14:00'] = '项目实践';
+            Object.keys(scheduleData).forEach(day => scheduleData[day][formatted] = '');
             renderSchedule();
-            updateProgress();
-            updatePreview();
-            showToast('已加载示例数据');
+            scheduleAutoSave();
+            showToast('已添加 ' + formatted);
         }
 
+        function cancelNewTime(row) {
+            row.remove();
+            const tbody = document.getElementById('scheduleBody');
+            const allTimes = new Set();
+            Object.values(scheduleData).forEach(dayData => Object.keys(dayData).forEach(time => allTimes.add(time)));
+            if (allTimes.size === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-gray-400 dark:text-gray-500 text-sm">
+                    <div class="flex flex-col items-center gap-2">
+                        <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>点击「添加时间段」开始规划</span>
+                    </div>
+                </td></tr>`;
+            }
+        }
+
+        function deleteTimeSlot(timeStr) {
+            Object.keys(scheduleData).forEach(day => delete scheduleData[day][timeStr]);
+            renderSchedule();
+            scheduleAutoSave();
+            showToast('已删除时间段 ' + timeStr);
+        }
+
+        // ============ Excel 导出 ============
+        function exportExcel() {
+            try {
+                const wb = XLSX.utils.book_new();
+                const scheduleSheet = [];
+                scheduleSheet.push(['⏰ 每日时间轴', '', '', '', '', '', '', '']);
+                scheduleSheet.push(['', '', '', '', '', '', '', '']);
+                scheduleSheet.push(['时间', '周一', '周二', '周三', '周四', '周五', '周六', '周日']);
+
+                const allTimes = new Set();
+                Object.values(scheduleData).forEach(dayData => Object.keys(dayData).forEach(time => allTimes.add(time)));
+                const sortedTimes = Array.from(allTimes).sort();
+
+                if (sortedTimes.length === 0) scheduleSheet.push(['暂无时间段', '', '', '', '', '', '', '']);
+                else {
+                    sortedTimes.forEach(time => {
+                        const row = [time];
+                        ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => row.push(scheduleData[day][time] || ''));
+                        scheduleSheet.push(row);
+                    });
+                }
+
+                scheduleSheet.push(['', '', '', '', '', '', '', '']);
+                scheduleSheet.push(['📌 使用说明', '', '', '', '', '', '', '']);
+                scheduleSheet.push(['1. 按时间规划每日活动', '', '', '', '', '', '', '']);
+
+                const ws1 = XLSX.utils.aoa_to_sheet(scheduleSheet);
+                ws1['!merges'] = [
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+                    { s: { r: scheduleSheet.length - 2, c: 0 }, e: { r: scheduleSheet.length - 2, c: 7 } }
+                ];
+                ws1['!cols'] = [{ wch: 14 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }, { wch: 22 }];
+                XLSX.utils.book_append_sheet(wb, ws1, '每日时间轴');
+
+                const goalSheet = [];
+                goalSheet.push(['🎯 暑假学习计划', '']);
+                goalSheet.push(['', '']);
+                goalSheet.push(['阶段目标', document.getElementById('stageGoal').value || '']);
+                goalSheet.push(['', '']);
+                goalSheet.push(['本周重点', '']);
+                document.querySelectorAll('.flag-item').forEach((item, idx) => {
+                    const text = item.querySelector('input').value;
+                    const checked = item.querySelector('.check-btn').classList.contains('checked');
+                    if (text && text.trim()) goalSheet.push([idx + 1, (checked ? '✅ ' : '⬜ ') + text]);
+                });
+                goalSheet.push(['', '']);
+                goalSheet.push(['待办清单', '']);
+                document.querySelectorAll('.todo-item').forEach((item, idx) => {
+                    const text = item.querySelector('input').value;
+                    const checked = item.querySelector('.check-btn').classList.contains('checked');
+                    if (text && text.trim()) goalSheet.push([idx + 1, (checked ? '✅ ' : '⬜ ') + text]);
+                });
+
+                const ws2 = XLSX.utils.aoa_to_sheet(goalSheet);
+                ws2['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+                ws2['!cols'] = [{ wch: 14 }, { wch: 60 }];
+                XLSX.utils.book_append_sheet(wb, ws2, '目标与待办');
+
+                XLSX.writeFile(wb, '暑假学习计划_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+                showToast('Excel 导出成功！');
+            } catch (e) {
+                console.error('导出失败:', e);
+                showToast('导出失败，请检查控制台');
+            }
+        }
+
+        // ============ 文本智能解析 ============
+        function parseTextContent(text) {
+            const result = { flags: [], todos: [], schedule: {}, scheduleByDay: {}, goal: '' };
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+            const goalKeywords = ['目标', 'goal', '目的', '计划目标', '暑假目标', '学习目标', '总体目标', '最终目标', '期望目标', 'objective', 'target'];
+            const flagKeywords = ['重点', 'flag', '主要任务', '核心任务', '关键任务', '重要任务', '本周重点', '本周核心', '重点任务', 'priority', 'focus'];
+            const todoKeywords = ['待办', 'todo', '任务', '清单', '事项', '待办事项', '任务清单', '待处理', '待完成', 'to-do', 'task', 'checklist'];
+            const scheduleKeywords = ['时间', 'time', '日程', '安排', '时间表', '日程表', '作息表', '时间安排', '每日安排', 'schedule', 'timetable'];
+
+            const timePatterns = [
+                /^(\d{1,2}):(\d{2})\s*[-~—–]\s*(\d{1,2}):(\d{2})\s*(.*)$/,
+                /^(\d{1,2}):(\d{2})\s*(.*)$/,
+                /^(\d{1,2})\s*[:点]\s*(\d{0,2})\s*(.*)$/,
+                /^(\d{1,2})\s*[时]\s*(.*)$/
+            ];
+
+            const listPatterns = [
+                /^(\d+)\s*[\.\)\、]\s*(.+)$/,
+                /^[\-\*\+•●◆■]\s*(.+)$/,
+                /^[\u2022\u2023\u25E6]\s*(.+)$/,
+                /^\[(.)\]\s*(.+)$/,
+                /^(\d+)\s*(.+)$/
+            ];
+
+            let currentSection = '';
+
+            lines.forEach((line, idx) => {
+                if (!line) return;
+                let matched = false;
+
+                if (goalKeywords.some(k => line.includes(k))) {
+                    const value = line.replace(/^.*?(目标|目的|objective|target)\s*[：:]\s*/i, '').replace(/^[【】\[\]《》\s]+/, '').replace(/[【】\[\]《》\s]+$/, '');
+                    if (value && value.length > 2) result.goal = value;
+                    else if (!result.goal) {
+                        const nextLine = lines[idx + 1] || '';
+                        if (nextLine && !goalKeywords.some(k => nextLine.includes(k))) result.goal = nextLine.trim();
+                    }
+                    matched = true;
+                }
+
+                let timeMatched = false;
+                for (const pattern of timePatterns) {
+                    const match = line.match(pattern);
+                    if (match) {
+                        let timeStr;
+                        const h1 = match[1] || '';
+                        const m1 = match[2] || '0';
+                        if (match[3] && /^\d+$/.test(match[3])) {
+                            timeStr = `${h1.padStart(2, '0')}:${m1.padStart(2, '0')}-${match[3].padStart(2, '0')}:${(match[4] || '0').padStart(2, '0')}`;
+                        } else {
+                            timeStr = `${h1.padStart(2, '0')}:${m1.padStart(2, '0')}`;
+                        }
+                        const content = match[match.length - 1] || '';
+                        const trimmedContent = content.trim();
+
+                        if (trimmedContent.includes('|')) {
+                            const dayParts = trimmedContent.split('|');
+                            const dayOrder = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                            const scheduleKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+                            dayParts.forEach(part => {
+                                const trimmedPart = part.trim();
+                                if (trimmedPart.includes('每天') || trimmedPart.includes('日常')) {
+                                    const activity = trimmedPart.replace(/(每天|日常)\s*[：:]\s*/, '').trim();
+                                    if (activity) scheduleKeys.forEach(dayKey => setSchedule(dayKey, timeStr, activity));
+                                } else if (trimmedPart.includes('周一至周五') || trimmedPart.includes('周一到周五')) {
+                                    const activity = trimmedPart.replace(/(周一至周五|周一到周五)\s*[：:]\s*/, '').trim();
+                                    if (activity) ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(dayKey => setSchedule(dayKey, timeStr, activity));
+                                } else if (trimmedPart.includes('周一至周六') || trimmedPart.includes('周一到周六')) {
+                                    const activity = trimmedPart.replace(/(周一至周六|周一到周六)\s*[：:]\s*/, '').trim();
+                                    if (activity) ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'].forEach(dayKey => setSchedule(dayKey, timeStr, activity));
+                                } else {
+                                    const dayNameMatch = trimmedPart.match(/(周一|周二|周三|周四|周五|周六|周日)/);
+                                    if (dayNameMatch) {
+                                        const dayKey = scheduleKeys[dayOrder.indexOf(dayNameMatch[0])];
+                                        const activity = trimmedPart.replace(/(周一|周二|周三|周四|周五|周六|周日)\s*[：:]\s*/, '').trim();
+                                        if (activity) setSchedule(dayKey, timeStr, activity);
+                                    }
+                                }
+                            });
+                        } else if (trimmedContent.includes('每天') || trimmedContent.includes('日常')) {
+                            const activity = trimmedContent.replace(/(每天|日常)\s*[：:]\s*/, '').trim();
+                            if (activity) ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(dayKey => setSchedule(dayKey, timeStr, activity));
+                        } else if (trimmedContent.includes('周一至周五') || trimmedContent.includes('周一到周五')) {
+                            const activity = trimmedContent.replace(/(周一至周五|周一到周五)\s*[：:]\s*/, '').trim();
+                            if (activity) ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(dayKey => setSchedule(dayKey, timeStr, activity));
+                        } else if (trimmedContent.includes('周一至周六') || trimmedContent.includes('周一到周六')) {
+                            const activity = trimmedContent.replace(/(周一至周六|周一到周六)\s*[：:]\s*/, '').trim();
+                            if (activity) ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'].forEach(dayKey => setSchedule(dayKey, timeStr, activity));
+                        } else {
+                            const dayOrder = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                            const scheduleKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+                            const dayNameMatch = trimmedContent.match(/(周一|周二|周三|周四|周五|周六|周日)/);
+                            if (dayNameMatch) {
+                                const dayKey = scheduleKeys[dayOrder.indexOf(dayNameMatch[0])];
+                                const activity = trimmedContent.replace(/(周一|周二|周三|周四|周五|周六|周日)\s*[：:]\s*/, '').trim();
+                                if (activity) setSchedule(dayKey, timeStr, activity);
+                            } else {
+                                result.schedule[timeStr] = trimmedContent;
+                            }
+                        }
+
+                        timeMatched = true;
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (!matched && goalKeywords.some(k => line.includes(k))) matched = true;
+                if (!matched && flagKeywords.some(k => line.includes(k))) { currentSection = 'flags'; matched = true; }
+                if (!matched && todoKeywords.some(k => line.includes(k))) { currentSection = 'todos'; matched = true; }
+                if (!matched && scheduleKeywords.some(k => line.includes(k))) { currentSection = 'schedule'; matched = true; }
+                if (!matched && line.match(/^[周一二三四五六日]\s*[：:]/)) { currentSection = 'schedule'; matched = true; }
+
+                if (!matched) {
+                    for (const pattern of listPatterns) {
+                        const match = line.match(pattern);
+                        if (match) {
+                            const content = match[match.length - 1].trim();
+                            if (content && content.length > 1) {
+                                if (currentSection === 'flags') result.flags.push({ text: content, checked: false });
+                                else if (currentSection === 'todos') result.todos.push({ text: content, checked: false });
+                                else {
+                                    if (isFlagContent(content)) result.flags.push({ text: content, checked: false });
+                                    else {
+                                        if (result.flags.length < 5) result.flags.push({ text: content, checked: false });
+                                        else if (result.todos.length < 10) result.todos.push({ text: content, checked: false });
+                                    }
+                                }
+                            }
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!matched && !currentSection && line.length > 2 && line.length < 80) {
+                    if (isFlagContent(line)) result.flags.push({ text: line, checked: false });
+                    else if (result.flags.length < 3) result.flags.push({ text: line, checked: false });
+                }
+            });
+
+            function setSchedule(dayKey, time, activity) {
+                if (!result.scheduleByDay[dayKey]) result.scheduleByDay[dayKey] = {};
+                result.scheduleByDay[dayKey][time] = activity;
+            }
+
+            function isFlagContent(text) {
+                const indicators = ['完成', '达到', '实现', '掌握', '学会', '通过', '目标', '计划', '复习', '学习'];
+                return indicators.some(i => text.includes(i));
+            }
+
+            return result;
+        }
+
+        // ============ 导入数据 ============
         function applyImportedData(data) {
-            saveToHistory();
             if (data.goal) document.getElementById('stageGoal').value = data.goal;
-            if (data.achievements) document.getElementById('achievements').value = data.achievements;
-            if (data.nextWeek) document.getElementById('nextWeek').value = data.nextWeek;
 
             const flagsContainer = document.getElementById('flagsContainer');
             const flagsAddBtn = document.getElementById('addFlagBtn');
             flagsContainer.innerHTML = '';
-            (data.flags || []).forEach(flag => {
-                const div = document.createElement('div');
-                div.className = 'flex items-start gap-3 flag-item';
-                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (flag.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (flag.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + (flag.text || '') + '" placeholder="输入重点目标...">';
-                flagsContainer.appendChild(div);
-                initCheckBtn(div.querySelector('.check-btn'));
-                div.querySelector('input').addEventListener('input', updatePreview);
-            });
+            if (data.flags && data.flags.length > 0) data.flags.forEach(flag => flagsContainer.appendChild(createFlagItem(flag.text, flag.checked)));
             flagsContainer.appendChild(flagsAddBtn);
 
             const todosContainer = document.getElementById('todosContainer');
             const todosAddBtn = document.getElementById('addTodoBtn');
             todosContainer.innerHTML = '';
-            (data.todos || []).forEach(todo => {
-                const div = document.createElement('div');
-                div.className = 'flex items-start gap-3 todo-item';
-                div.innerHTML = '<button class="check-btn mt-1 w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center check-circle ' + (todo.checked ? 'checked' : '') + '"><svg class="w-3 h-3 text-white transition-opacity ' + (todo.checked ? '' : 'opacity-0') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></button><input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + (todo.text || '') + '" placeholder="输入待办事项...">';
-                todosContainer.appendChild(div);
-                initCheckBtn(div.querySelector('.check-btn'));
-            });
+            if (data.todos && data.todos.length > 0) data.todos.forEach(todo => todosContainer.appendChild(createTodoItem(todo.text, todo.checked)));
             todosContainer.appendChild(todosAddBtn);
 
-            const habitsContainer = document.getElementById('habitsContainer');
-            const habitsAddBtn = document.getElementById('addHabitBtn');
-            habitsContainer.innerHTML = '';
-            (data.habits || []).forEach(habit => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between habit-item';
-                let daysHtml = '';
-                const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
-                (habit.days || [false, false, false, false, false, false, false]).forEach((checked, idx) => {
-                    daysHtml += '<button class="habit-check-btn w-6 h-6 rounded border border-gray-200 dark:border-dark-border flex items-center justify-center text-xs hover:bg-primary-500 hover:text-white transition-colors ' + (checked ? 'bg-primary-500 text-white' : '') + '">' + dayNames[idx] + '</button>';
-                });
-                div.innerHTML = '<input type="text" class="flex-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm input-focus-ring" value="' + (habit.name || '') + '" placeholder="习惯名称..."><div class="flex gap-1 ml-3">' + daysHtml + '</div>';
-                habitsContainer.appendChild(div);
-                div.querySelectorAll('.habit-check-btn').forEach(btn => {
-                    btn.addEventListener('click', function() { saveToHistory(); this.classList.toggle('bg-primary-500'); this.classList.toggle('text-white'); updateProgress(); });
-                });
-            });
-            habitsContainer.appendChild(habitsAddBtn);
+            Object.keys(scheduleData).forEach(day => scheduleData[day] = {});
 
-            if (data.schedule) {
-                Object.keys(scheduleData).forEach(day => { scheduleData[day] = {}; });
+            if (data.scheduleByDay && Object.keys(data.scheduleByDay).length > 0) {
+                Object.keys(data.scheduleByDay).forEach(dayKey => {
+                    if (scheduleData[dayKey]) {
+                        Object.keys(data.scheduleByDay[dayKey]).forEach(time => {
+                            scheduleData[dayKey][time] = data.scheduleByDay[dayKey][time] || '';
+                        });
+                    }
+                });
+            }
+
+            if (data.schedule && Object.keys(data.schedule).length > 0) {
+                const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
                 Object.keys(data.schedule).forEach(time => {
-                    Object.keys(scheduleData).forEach(day => {
-                        scheduleData[day][time] = data.schedule[time] || '';
-                    });
+                    days.forEach(day => { if (!scheduleData[day][time]) scheduleData[day][time] = data.schedule[time] || ''; });
                 });
-                renderSchedule();
             }
 
-            updateProgress();
-            updatePreview();
-            showToast('导入成功');
+            renderSchedule();
+            scheduleAutoSave();
+            showToast('导入成功！');
         }
 
-        function parseExcelFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                        const result = parseTableData(jsonData);
-                        resolve(result);
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
+        // ============ Toast ============
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+            setTimeout(() => toast.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none'), 2200);
         }
 
-        function parseWordFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    mammoth.extractRawText({ arrayBuffer: e.target.result })
-                        .then(function(result) {
-                            const text = result.value;
-                            const parsed = parseTextContent(text);
-                            resolve(parsed);
-                        })
-                        .catch(reject);
-                };
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
-        function parseTextFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const text = e.target.result;
-                    const parsed = parseTextContent(text);
-                    resolve(parsed);
-                };
-                reader.onerror = reject;
-                reader.readAsText(file, 'utf-8');
-            });
-        }
-
-        function parseCsvFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const text = e.target.result;
-                    const rows = text.split('\n').map(row => {
-                        const result = [];
-                        let current = '';
-                        let inQuote = false;
-                        for (let i = 0; i < row.length; i++) {
-                            const char = row[i];
-                            if (char === '"' && (i === 0 || row[i-1] !== '\\')) {
-                                inQuote = !inQuote;
-                            } else if (char === ',' && !inQuote) {
-                                result.push(current);
-                                current = '';
-                            } else {
-                                current += char;
-                            }
-                        }
-                        result.push(current);
-                        return result;
-                    });
-                    const result = parseTableData(rows);
-                    resolve(result);
-                };
-                reader.onerror = reject;
-                reader.readAsText(file, 'utf-8');
-            });
-        }
-
-        function parseJsonFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        const result = {
-                            goal: data.stageGoal || data.goal || '',
-                            achievements: data.achievements || '',
-                            nextWeek: data.nextWeek || '',
-                            flags: data.flags || [],
-                            todos: data.todos || [],
-                            habits: data.habits || [],
-                            schedule: {}
-                        };
-                        if (data.scheduleData) {
-                            Object.keys(data.scheduleData).forEach(day => {
-                                Object.keys(data.scheduleData[day]).forEach(time => {
-                                    if (!result.schedule[time]) result.schedule[time] = '';
-                                });
-                            });
-                        }
-                        resolve(result);
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                reader.onerror = reject;
-                reader.readAsText(file, 'utf-8');
-            });
-        }
-
-        function parseTableData(data) {
-            const result = { flags: [], todos: [], habits: [], schedule: {}, goal: '', achievements: '', nextWeek: '' };
-            let currentSection = '';
-
-            const goalKeywords = ['目标', 'goal', 'Goal', '目的', '计划目标', '总目标'];
-            const flagKeywords = ['重点', 'flag', 'Flag', '主要任务', '核心任务'];
-            const todoKeywords = ['待办', 'todo', 'Todo', '任务', '清单', '事项'];
-            const habitKeywords = ['习惯', 'habit', 'Habit', '日常', '打卡'];
-            const scheduleKeywords = ['时间', 'time', 'Time', '日程', '安排'];
-            const achievementKeywords = ['成就', 'achievement', '总结', '成果'];
-            const nextWeekKeywords = ['下周', 'next', 'Next', '未来'];
-
-            for (let i = 0; i < data.length; i++) {
-                const row = data[i];
-                if (!row || row.length === 0) continue;
-
-                const firstCell = String(row[0] || '').trim().toLowerCase();
-                const originalFirstCell = String(row[0] || '').trim();
-
-                if (goalKeywords.some(k => originalFirstCell.includes(k))) {
-                    result.goal = String(row[row.length - 1] || row[1] || '').trim();
-                } else if (flagKeywords.some(k => firstCell.includes(k))) {
-                    currentSection = 'flags';
-                } else if (todoKeywords.some(k => firstCell.includes(k))) {
-                    currentSection = 'todos';
-                } else if (habitKeywords.some(k => firstCell.includes(k))) {
-                    currentSection = 'habits';
-                } else if (scheduleKeywords.some(k => firstCell.includes(k))) {
-                    currentSection = 'schedule';
-                } else if (achievementKeywords.some(k => firstCell.includes(k))) {
-                    result.achievements = String(row[row.length - 1] || row[1] || '').trim();
-                } else if (nextWeekKeywords.some(k => firstCell.includes(k))) {
-                    result.nextWeek = String(row[row.length - 1] || row[1] || '').trim();
-                } else if (currentSection === 'flags' && originalFirstCell && !originalFirstCell.startsWith('-') && !/^\d+$/.test(originalFirstCell)) {
-                    result.flags.push({ text: originalFirstCell, checked: false });
-                } else if (currentSection === 'todos' && originalFirstCell && !originalFirstCell.startsWith('-') && !/^\d+$/.test(originalFirstCell)) {
-                    result.todos.push({ text: originalFirstCell, checked: false });
-                } else if (currentSection === 'habits' && originalFirstCell) {
-                    result.habits.push({ name: originalFirstCell, days: [false, false, false, false, false, false, false] });
-                } else if (currentSection === 'schedule' && /^\d{1,2}:\d{2}$/.test(originalFirstCell)) {
-                    result.schedule[originalFirstCell] = row[1] ? String(row[1]).trim() : '';
-                } else if (/^\d{1,2}:\d{2}/.test(originalFirstCell)) {
-                    const timeMatch = originalFirstCell.match(/^\d{1,2}:\d{2}/);
-                    if (timeMatch) {
-                        result.schedule[timeMatch[0]] = originalFirstCell.replace(timeMatch[0], '').trim() || (row[1] ? String(row[1]).trim() : '');
-                    }
-                } else if (originalFirstCell && !currentSection && !/^[\d\.\-*+]$/.test(originalFirstCell)) {
-                    if (result.flags.length < 5) {
-                        result.flags.push({ text: originalFirstCell, checked: false });
-                    } else if (result.todos.length < 5) {
-                        result.todos.push({ text: originalFirstCell, checked: false });
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        function parseTextContent(text) {
-            const result = { flags: [], todos: [], habits: [], schedule: {}, goal: '', achievements: '', nextWeek: '' };
-            const lines = text.split('\n');
-            let currentSection = '';
-
-            const goalKeywords = ['目标', 'goal', 'Goal', '目的', '计划目标'];
-            const flagKeywords = ['重点', 'flag', 'Flag', '主要任务'];
-            const todoKeywords = ['待办', 'todo', 'Todo', '任务', '清单'];
-            const habitKeywords = ['习惯', 'habit', 'Habit', '日常'];
-            const scheduleKeywords = ['时间', 'time', 'Time', '日程'];
-            const achievementKeywords = ['成就', 'achievement', '总结'];
-            const nextWeekKeywords = ['下周', 'next', 'Next'];
-
-            lines.forEach(line => {
-                line = line.trim();
-                if (!line) return;
-
-                if (goalKeywords.some(k => line.includes(k))) {
-                    result.goal = line.replace(/^.*[目标目的]\s*[：:]\s*/, '').replace(/^[目标【】\s]+/, '');
-                } else if (flagKeywords.some(k => line.includes(k))) {
-                    currentSection = 'flags';
-                } else if (todoKeywords.some(k => line.includes(k))) {
-                    currentSection = 'todos';
-                } else if (habitKeywords.some(k => line.includes(k))) {
-                    currentSection = 'habits';
-                } else if (scheduleKeywords.some(k => line.includes(k))) {
-                    currentSection = 'schedule';
-                } else if (achievementKeywords.some(k => line.includes(k))) {
-                    result.achievements = line.replace(/^.*[成就总结]\s*[：:]\s*/, '');
-                } else if (nextWeekKeywords.some(k => line.includes(k))) {
-                    result.nextWeek = line.replace(/^.*[下周]\s*[：:]\s*/, '');
-                } else if (line.match(/^[\d\.\-*+•]\s+/)) {
-                    const content = line.replace(/^[\d\.\-*+•]\s+/, '');
-                    if (currentSection === 'flags') {
-                        result.flags.push({ text: content, checked: false });
-                    } else if (currentSection === 'todos') {
-                        result.todos.push({ text: content, checked: false });
-                    } else if (currentSection === 'habits') {
-                        result.habits.push({ name: content, days: [false, false, false, false, false, false, false] });
-                    } else if (!currentSection) {
-                        if (result.flags.length < 5) {
-                            result.flags.push({ text: content, checked: false });
-                        } else {
-                            result.todos.push({ text: content, checked: false });
-                        }
-                    }
-                } else if (line.match(/^\d{1,2}:\d{2}/)) {
-                    const timeMatch = line.match(/^\d{1,2}:\d{2}/);
-                    if (timeMatch) {
-                        result.schedule[timeMatch[0]] = line.replace(timeMatch[0], '').trim();
-                    }
-                } else if (line.match(/^[周一二三四五六日]\s*[：:]/)) {
-                    currentSection = 'schedule';
-                } else if (!currentSection && line.length > 2 && line.length < 50) {
-                    if (result.flags.length < 5) {
-                        result.flags.push({ text: line, checked: false });
-                    }
-                }
-            });
-
-            return result;
-        }
-
-        async function handleFileImport(file) {
-            try {
-                showToast('正在解析文件...');
-                let data;
-
-                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                    data = await parseExcelFile(file);
-                } else if (file.name.endsWith('.docx')) {
-                    data = await parseWordFile(file);
-                } else if (file.name.endsWith('.csv')) {
-                    data = await parseCsvFile(file);
-                } else if (file.name.endsWith('.txt')) {
-                    data = await parseTextFile(file);
-                } else if (file.name.endsWith('.json')) {
-                    data = await parseJsonFile(file);
-                } else {
-                    showToast('不支持的文件格式');
-                    return;
-                }
-
-                applyImportedData(data);
-            } catch (error) {
-                console.error('导入失败:', error);
-                showToast('导入失败，请检查文件格式');
-            }
-        }
-
-        function initEventListeners() {
-            document.querySelectorAll('.template-btn').forEach(btn => {
-                btn.addEventListener('click', function() { loadTemplate(this.dataset.template); });
-            });
-
+        // ============ 事件绑定 ============
+        function initEvents() {
             document.getElementById('addFlagBtn').addEventListener('click', addFlag);
             document.getElementById('addTodoBtn').addEventListener('click', addTodo);
-            document.getElementById('addHabitBtn').addEventListener('click', addHabit);
             document.getElementById('addTimeSlotBtn').addEventListener('click', addTimeSlot);
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('tab-active'); b.classList.add('text-gray-500', 'dark:text-gray-400'); });
-                    this.classList.add('tab-active');
-                    this.classList.remove('text-gray-500', 'dark:text-gray-400');
-                    currentDay = this.dataset.day;
-                    renderSchedule();
-                });
-            });
-
-            document.getElementById('undoBtn').addEventListener('click', undo);
-            document.getElementById('copyBtn').addEventListener('click', copyPlan);
             document.getElementById('exportBtn').addEventListener('click', exportExcel);
-            document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
-            document.getElementById('themeBtn').addEventListener('click', toggleTheme);
-            document.getElementById('clearBtn').addEventListener('click', clearAll);
-            document.getElementById('loadSampleBtn').addEventListener('click', loadSampleData);
 
-            document.getElementById('stageGoal').addEventListener('input', function() { saveToHistory(); updatePreview(); });
-            document.getElementById('achievements').addEventListener('input', saveToHistory);
-            document.getElementById('nextWeek').addEventListener('input', saveToHistory);
+            document.getElementById('clearBtn').addEventListener('click', function() {
+                if (confirm('确定要清空当前计划「' + getCurrentPlanName() + '」的所有内容吗？')) {
+                    localStorage.removeItem('planData_' + currentPlanId);
+                    Object.keys(scheduleData).forEach(day => scheduleData[day] = {});
+                    document.getElementById('stageGoal').value = '';
 
-            document.getElementById('dropZone').addEventListener('click', function() {
-                document.getElementById('importFile').click();
-            });
+                    const flagsContainer = document.getElementById('flagsContainer');
+                    const flagsAddBtn = document.getElementById('addFlagBtn');
+                    flagsContainer.innerHTML = '';
+                    for (let i = 0; i < 3; i++) flagsContainer.appendChild(createFlagItem('', false));
+                    flagsContainer.appendChild(flagsAddBtn);
 
-            document.getElementById('selectFileBtn').addEventListener('click', function() {
-                document.getElementById('importFile').click();
-            });
+                    const todosContainer = document.getElementById('todosContainer');
+                    const todosAddBtn = document.getElementById('addTodoBtn');
+                    todosContainer.innerHTML = '';
+                    for (let i = 0; i < 3; i++) todosContainer.appendChild(createTodoItem('', false));
+                    todosContainer.appendChild(todosAddBtn);
 
-            document.getElementById('importFile').addEventListener('change', function(e) {
-                if (e.target.files[0]) {
-                    handleFileImport(e.target.files[0]);
+                    renderSchedule();
+                    scheduleAutoSave();
+                    showToast('已清空当前计划');
                 }
             });
 
-            document.getElementById('dropZone').addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('drag-over');
-            });
+            document.getElementById('stageGoal').addEventListener('input', scheduleAutoSave);
 
-            document.getElementById('dropZone').addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-            });
-
-            document.getElementById('dropZone').addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-                if (e.dataTransfer.files[0]) {
-                    handleFileImport(e.dataTransfer.files[0]);
+            document.getElementById('scheduleBody').addEventListener('input', function(e) {
+                if (e.target.classList.contains('schedule-input')) {
+                    const day = e.target.dataset.day;
+                    const time = e.target.dataset.time;
+                    scheduleData[day][time] = e.target.value;
+                    scheduleAutoSave();
                 }
             });
 
-            document.getElementById('pasteTextBtn').addEventListener('click', function() {
-                document.getElementById('pasteModal').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('scheduleBody').addEventListener('click', function(e) {
+                if (e.target.closest('.delete-time-btn')) {
+                    const btn = e.target.closest('.delete-time-btn');
+                    const time = btn.dataset.time;
+                    if (confirm('确定要删除时间段 ' + time + ' 吗？')) deleteTimeSlot(time);
+                }
             });
 
-            document.getElementById('closePasteModal').addEventListener('click', function() {
-                document.getElementById('pasteModal').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('scheduleBody').addEventListener('blur', function(e) {
+                if (e.target.classList.contains('time-edit-input')) {
+                    const originalTime = e.target.dataset.originalTime;
+                    const newTime = e.target.value.trim();
+                    if (newTime && newTime !== originalTime) {
+                        const timePattern = /^\d{1,2}:\d{2}(-\d{1,2}:\d{2})?$/;
+                        if (timePattern.test(newTime)) {
+                            if (scheduleData.mon[newTime]) {
+                                showToast('该时间段已存在');
+                                e.target.value = originalTime;
+                                return;
+                            }
+                            Object.keys(scheduleData).forEach(day => {
+                                if (scheduleData[day][originalTime] !== undefined) {
+                                    scheduleData[day][newTime] = scheduleData[day][originalTime];
+                                    delete scheduleData[day][originalTime];
+                                }
+                            });
+                            renderSchedule();
+                            scheduleAutoSave();
+                            showToast('时间已修改为 ' + newTime);
+                        } else {
+                            showToast('请输入正确的时间格式，如 08:00');
+                            e.target.value = originalTime;
+                        }
+                    } else if (!newTime) e.target.value = originalTime;
+                }
             });
 
-            document.getElementById('cancelPasteBtn').addEventListener('click', function() {
-                document.getElementById('pasteModal').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('scheduleBody').addEventListener('keydown', function(e) {
+                if (e.target.classList.contains('time-edit-input')) {
+                    if (e.key === 'Enter') e.target.blur();
+                    else if (e.key === 'Escape') { e.target.value = e.target.dataset.originalTime; e.target.blur(); }
+                }
             });
 
-            document.getElementById('confirmPasteBtn').addEventListener('click', function() {
+            // 粘贴导入弹窗
+            const pasteModal = document.getElementById('pasteModal');
+            const pasteModalContent = document.getElementById('pasteModalContent');
+            document.getElementById('pasteBtn').addEventListener('click', () => {
+                pasteModal.classList.remove('opacity-0', 'pointer-events-none');
+                pasteModalContent.classList.remove('scale-95');
+                pasteModalContent.classList.add('scale-100');
+                document.getElementById('pasteTextArea').focus();
+            });
+
+            function closePasteModal() {
+                pasteModal.classList.add('opacity-0', 'pointer-events-none');
+                pasteModalContent.classList.remove('scale-100');
+                pasteModalContent.classList.add('scale-95');
+            }
+
+            document.getElementById('closePasteModal').addEventListener('click', closePasteModal);
+            document.getElementById('cancelPasteBtn').addEventListener('click', closePasteModal);
+            pasteModal.addEventListener('click', (e) => { if (e.target === pasteModal) closePasteModal(); });
+
+            document.getElementById('confirmPasteBtn').addEventListener('click', () => {
                 const text = document.getElementById('pasteTextArea').value;
-                if (text.trim()) {
-                    const data = parseTextContent(text);
-                    applyImportedData(data);
-                }
-                document.getElementById('pasteModal').classList.add('opacity-0', 'pointer-events-none');
+                if (!text.trim()) { showToast('请输入内容'); return; }
+                const data = parseTextContent(text);
+                applyImportedData(data);
+                closePasteModal();
                 document.getElementById('pasteTextArea').value = '';
             });
 
-            document.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-                    e.preventDefault();
-                    undo();
-                }
+            // ============ 计划管理弹窗 ============
+            const planModal = document.getElementById('planModal');
+            const planModalContent = document.getElementById('planModalContent');
+
+            function closePlanModalFn() {
+                planModal.classList.add('opacity-0', 'pointer-events-none');
+                planModalContent.classList.remove('scale-100');
+                planModalContent.classList.add('scale-95');
+            }
+
+            function openPlanModal() {
+                renderPlanList();
+                planModal.classList.remove('opacity-0', 'pointer-events-none');
+                planModalContent.classList.remove('scale-95');
+                planModalContent.classList.add('scale-100');
+            }
+
+            document.getElementById('planSwitcher').addEventListener('click', openPlanModal);
+            document.getElementById('closePlanModal').addEventListener('click', closePlanModalFn);
+            planModal.addEventListener('click', (e) => { if (e.target === planModal) closePlanModalFn(); });
+
+            // 新建计划
+            document.getElementById('createPlanBtn').addEventListener('click', () => {
+                const input = document.getElementById('newPlanNameInput');
+                const name = input.value.trim();
+                if (!name) { showToast('请输入计划名称'); return; }
+                const newId = createPlan(name);
+                input.value = '';
+                switchPlan(newId);
+                renderPlanList();
+                showToast('已创建计划：' + name);
+                closePlanModalFn();
             });
 
-            renderSchedule();
-            updateProgress();
-            updatePreview();
-            loadTheme();
-            loadFromStorage();
+            document.getElementById('newPlanNameInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('createPlanBtn').click();
+            });
+
+            // 导出当前计划为JSON
+            document.getElementById('exportCurrentPlanBtn').addEventListener('click', () => {
+                exportPlanAsFile(currentPlanId, getCurrentPlanName());
+            });
+
+            // 导入JSON文件
+            document.getElementById('importPlanFileBtn').addEventListener('click', () => {
+                document.getElementById('importPlanFileInput').click();
+            });
+
+            document.getElementById('importPlanFileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) importPlanFromFile(file);
+                e.target.value = '';
+            });
         }
 
-        initEventListeners();
+        // ============ 渲染计划列表 ============
+        function renderPlanList() {
+            const list = getPlanList();
+            const container = document.getElementById('planList');
+            container.innerHTML = '';
+
+            list.forEach(plan => {
+                const isActive = plan.id === currentPlanId;
+                const div = document.createElement('div');
+                div.className = `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-apple-blue/10 border border-apple-blue/20' : 'bg-white/30 dark:bg-black/10 border border-white/40 dark:border-white/5 hover:bg-white/50 dark:hover:bg-black/20'}`;
+
+                const planData = localStorage.getItem('planData_' + plan.id);
+                let savedInfo = '';
+                if (planData) {
+                    try {
+                        const d = JSON.parse(planData);
+                        if (d.savedAt) savedInfo = ' · ' + new Date(d.savedAt).toLocaleDateString();
+                    } catch {}
+                }
+
+                div.innerHTML = `
+                    <div class="w-9 h-9 rounded-xl ${isActive ? 'bg-gradient-to-br from-apple-blue to-cyan-400' : 'bg-gray-200 dark:bg-gray-700'} flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold ${isActive ? 'text-apple-blue' : 'text-gray-800 dark:text-gray-200'} truncate plan-name-display" data-plan-id="${plan.id}">${plan.name}</span>
+                            ${isActive ? '<span class="text-[10px] font-bold text-apple-blue bg-apple-blue/15 px-1.5 py-0.5 rounded-md whitespace-nowrap">当前</span>' : ''}
+                        </div>
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">${new Date(plan.createdAt).toLocaleDateString()}${savedInfo}</p>
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        ${!isActive ? `<button class="switch-plan-btn p-2 text-apple-blue hover:bg-apple-blue/10 rounded-lg transition-colors" data-plan-id="${plan.id}" title="切换到此计划">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </button>` : ''}
+                        <button class="export-plan-btn p-2 text-gray-400 hover:text-apple-blue hover:bg-apple-blue/10 rounded-lg transition-colors" data-plan-id="${plan.id}" data-plan-name="${plan.name}" title="导出为JSON文件">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                        </button>
+                        <button class="rename-plan-btn p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors" data-plan-id="${plan.id}" data-plan-name="${plan.name}" title="重命名">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                        </button>
+                        ${list.length > 1 ? `<button class="delete-plan-btn p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" data-plan-id="${plan.id}" title="删除计划">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>` : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            // 事件绑定
+            container.querySelectorAll('.switch-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchPlan(btn.dataset.planId);
+                    renderPlanList();
+                    showToast('已切换到：' + getCurrentPlanName());
+                    closePlanModalFn();
+                });
+            });
+
+            container.querySelectorAll('.export-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    exportPlanAsFile(btn.dataset.planId, btn.dataset.planName);
+                });
+            });
+
+            container.querySelectorAll('.delete-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const planId = btn.dataset.planId;
+                    const planList = getPlanList();
+                    const plan = planList.find(p => p.id === planId);
+                    if (confirm('确定要删除计划「' + (plan ? plan.name : '') + '」吗？此操作不可撤销。')) {
+                        if (deletePlan(planId)) {
+                            if (planId === currentPlanId) {
+                                currentPlanId = getPlanList()[0].id;
+                                localStorage.setItem('currentPlanId', currentPlanId);
+                                loadCurrentPlan();
+                                updatePlanNameDisplay();
+                            }
+                            renderPlanList();
+                            showToast('已删除计划');
+                        }
+                    }
+                });
+            });
+
+            container.querySelectorAll('.rename-plan-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const planId = btn.dataset.planId;
+                    const planList = getPlanList();
+                    const plan = planList.find(p => p.id === planId);
+                    const newName = prompt('输入新名称：', plan ? plan.name : '');
+                    if (newName && newName.trim()) {
+                        renamePlan(planId, newName.trim());
+                        if (planId === currentPlanId) updatePlanNameDisplay();
+                        renderPlanList();
+                        showToast('已重命名');
+                    }
+                });
+            });
+        }
+
+        // ============ 初始化 ============
+        loadFromStorage();
+        initEvents();
+        initBackgroundEvents();
     </script>
 </body>
 </html>
